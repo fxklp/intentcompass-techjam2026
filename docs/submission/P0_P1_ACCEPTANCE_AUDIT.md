@@ -1,7 +1,9 @@
 # P0/P1 first-version acceptance audit
 
-Audit date: 2026-08-29  
-Accepted code commit: `f3722bbebbc81c6d31e1cd914f8ce0d7499adaad`  
+Audit date: 2026-08-29
+
+Accepted code commit: `f3722bbebbc81c6d31e1cd914f8ce0d7499adaad`
+
 Working tree during final CI-equivalent run: clean
 
 ## P0: first runnable algorithm — PASS

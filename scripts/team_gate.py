@@ -149,6 +149,31 @@ def syntax_check() -> list[str]:
     return violations
 
 
+def trailing_whitespace_lines(content: str) -> list[int]:
+    return [
+        line_number
+        for line_number, line in enumerate(content.splitlines(), start=1)
+        if line.endswith((" ", "\t"))
+    ]
+
+
+def check_text_whitespace(paths: set[str]) -> list[str]:
+    violations = []
+    for relative in sorted(paths):
+        path = ROOT / relative
+        if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        if path.stat().st_size > 1_000_000:
+            continue
+        try:
+            content = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for line_number in trailing_whitespace_lines(content):
+            violations.append(f"trailing whitespace: {relative}:{line_number}")
+    return violations
+
+
 def evaluation_threshold_violations(result: dict) -> list[str]:
     violations = []
     if result.get("sample_count") != EXPECTED_PUBLIC_SESSIONS:
@@ -196,6 +221,7 @@ def main() -> int:
     paths = changed_paths()
     violations = check_protected(paths)
     violations += check_secrets_and_sizes(paths)
+    violations += check_text_whitespace(paths)
 
     diff_check = run(["git", "diff", "--check"])
     if diff_check.returncode != 0:
