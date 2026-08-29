@@ -25,7 +25,7 @@ python scripts/team_gate.py --full-eval
 
 Accepted local results:
 
-- tests: 12/12 passed;
+- tests: 14/14 passed;
 - public sessions: 200;
 - HitRate@10: 0.91;
 - MRR: 0.624024;
@@ -35,3 +35,17 @@ Accepted local results:
 
 The score above comes from the unchanged official local evaluator. Generated
 JSON remains ignored; reviewers must reproduce it from the commands above.
+
+## Fresh-checkout proof
+
+At commit `6175dfe`, an independent detached worktree containing no local
+catalog successfully ran, in order:
+
+1. `python scripts/setup_data.py` against the organizer release;
+2. `python demo/run_demo.py`;
+3. all 14 tests;
+4. the quick team gate.
+
+The temporary worktree was removed after verification. This proves that the
+demo does not depend on the commander's existing checkout or a teammate copying
+an untracked catalog by hand.
