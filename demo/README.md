@@ -7,8 +7,9 @@ python demo/run_demo.py
 ```
 
 The default scenario is the labeled public Intent Override session
-`public_0072`. It is selected because the accepted core commit finds the target
-immediately after the official simulator sends the correction.
+`public_0183`. It is selected because the target does not appear in Top 10
+before the override, and enters at rank 8 after the override on turn 5 —
+making per-turn display and final summary consistent with no contradiction.
 
 The demo prints:
 

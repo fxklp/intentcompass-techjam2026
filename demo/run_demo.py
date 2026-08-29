@@ -23,7 +23,8 @@ from evaluator.local_evaluator import (  # noqa: E402
 from starter.agent import Agent  # noqa: E402
 
 
-DEFAULT_SAMPLE = "public_0072"
+DEFAULT_SAMPLE = "public_0183"
+NOT_SCORED_UNTIL_OVERRIDE = "Not scored until intent override"
 
 
 def _active_state(agent: Agent, session_id: str, turn: int) -> tuple[dict[str, list[str]], str]:
@@ -34,6 +35,18 @@ def _active_state(agent: Agent, session_id: str, turn: int) -> tuple[dict[str, l
         for attribute, slot in state.preferences.items()
     }
     return preferences, state.retrieval_query(turn)
+
+
+def official_target_rank(raw_target_rank: int | None, *, score_eligible: bool) -> int | None:
+    """Apply the official Intent Override scoring gate to an observed Top 10 rank."""
+    return raw_target_rank if score_eligible else None
+
+
+def target_rank_display(raw_target_rank: int | None, *, score_eligible: bool) -> str:
+    """Return a truthful target-rank label for the current evaluator state."""
+    if not score_eligible:
+        return NOT_SCORED_UNTIL_OVERRIDE
+    return str(raw_target_rank) if raw_target_rank is not None else "not in Top 10"
 
 
 def run_session(sample_id: str = DEFAULT_SAMPLE, *, verbose: bool = True) -> dict:
@@ -58,9 +71,10 @@ def run_session(sample_id: str = DEFAULT_SAMPLE, *, verbose: bool = True) -> dic
 
     disclosed: set[str] = set()
     boundary_used = False
-    override_applied = False
+    score_eligible = False
     override_seen = False
     override = effective_sample["behavior"].get("override") or {}
+    override_turn = int(override.get("turn", 3))
     old_value = str(override.get("old_value", ""))
     new_value = str(override.get("new_value", ""))
     user_message = initial_message(
@@ -68,79 +82,116 @@ def run_session(sample_id: str = DEFAULT_SAMPLE, *, verbose: bool = True) -> dic
         coarse_category(categories.get(target, [])),
         disclosed,
     )
+    turn_records: list[dict] = []
+    override_preferences: dict[str, list[str]] | None = None
+    override_query: str | None = None
+    first_hit_turn: int | None = None
+    best_rank: int | None = None
+    preferences: dict[str, list[str]] = {}
+    query = ""
 
     if verbose:
         print("=" * 72)
         print("IntentCompass deterministic demo")
         print(f"Session: {sample_id} | Scenario: intent_override")
-        print("The harness knows the public target only to display rank.")
+        print("The harness knows the public target only for official scoring.")
         print("The Agent receives only user_profile and customer messages.")
         print("=" * 72)
 
-    for turn in range(1, MAX_TURNS + 1):
-        response = agent.respond(session_id, user_message, turn, TOP_K)
-        ranked = normalize_recommendations(response["recommendations"], catalog_ids)
-        preferences, query = _active_state(agent, session_id, turn)
-        target_rank = ranked.index(target) + 1 if target in ranked else None
-
-        if verbose:
-            print(f"\nTURN {turn}")
-            print(f"Customer     : {user_message}")
-            print(f"Active state : {preferences or '{}'}")
-            print(f"Search query : {query or '<empty>'}")
-            print(f"Ask attribute: {response['ask_attribute']}")
-            print(f"Agent message: {response['message']}")
-            print(f"Top 10       : {ranked}")
-            print(f"Target rank  : {target_rank if target_rank is not None else 'not in Top 10'}")
-
-        if override_applied and target_rank is not None:
-            result = {
-                "sample_id": sample_id,
-                "hit": True,
-                "first_hit_turn": turn,
-                "best_rank": target_rank,
-                "override_seen": override_seen,
-                "active_preferences": preferences,
-                "query": query,
-                "old_value": old_value,
-                "new_value": new_value,
-            }
-            if verbose:
-                print("\nDEMO RESULT: HIT after override")
-                print(f"First hit turn: {turn} | Rank: {target_rank}")
-                print("=" * 72)
-            return result
-
-        if turn == MAX_TURNS:
-            break
-
-        if not override_applied and turn + 1 == int(override.get("turn", 3)):
-            override_applied = True
-            override_seen = True
-            if new_value:
-                disclosed.add(new_value)
-            user_message = str(override.get("message"))
-        else:
-            user_message, boundary_used = customer_reply(
-                effective_sample,
-                response.get("ask_attribute"),
-                disclosed,
-                boundary_used,
+    try:
+        for turn in range(1, MAX_TURNS + 1):
+            response = agent.respond(session_id, user_message, turn, TOP_K)
+            ranked = normalize_recommendations(response["recommendations"], catalog_ids)
+            preferences, query = _active_state(agent, session_id, turn)
+            raw_target_rank = ranked.index(target) + 1 if target in ranked else None
+            scored_target_rank = official_target_rank(
+                raw_target_rank,
+                score_eligible=score_eligible,
             )
+            rank_display = target_rank_display(
+                raw_target_rank,
+                score_eligible=score_eligible,
+            )
+
+            if score_eligible and override_preferences is None:
+                override_preferences = {
+                    attribute: list(values)
+                    for attribute, values in preferences.items()
+                }
+                override_query = query
+
+            turn_records.append({
+                "turn": turn,
+                "customer_message": user_message,
+                "active_preferences": {
+                    attribute: list(values)
+                    for attribute, values in preferences.items()
+                },
+                "query": query,
+                "ask_attribute": response["ask_attribute"],
+                "agent_message": response["message"],
+                "top_10": list(ranked),
+                "score_eligible": score_eligible,
+                "raw_target_rank": raw_target_rank,
+                "scored_target_rank": scored_target_rank,
+                "target_rank_display": rank_display,
+            })
+
+            if verbose:
+                print(f"\nTURN {turn}")
+                print(f"Customer     : {user_message}")
+                print(f"Active state : {preferences or '{}'}")
+                print(f"Search query : {query or '<empty>'}")
+                print(f"Ask attribute: {response['ask_attribute']}")
+                print(f"Agent message: {response['message']}")
+                print(f"Top 10       : {ranked}")
+                print(f"Target rank  : {rank_display}")
+
+            if scored_target_rank is not None:
+                first_hit_turn = turn
+                best_rank = scored_target_rank
+                break
+
+            if turn == MAX_TURNS:
+                break
+
+            if not score_eligible and turn + 1 == override_turn:
+                score_eligible = True
+                override_seen = True
+                if new_value:
+                    disclosed.add(new_value)
+                user_message = str(override.get("message"))
+            else:
+                user_message, boundary_used = customer_reply(
+                    effective_sample,
+                    response.get("ask_attribute"),
+                    disclosed,
+                    boundary_used,
+                )
+    finally:
+        agent.close()
 
     result = {
         "sample_id": sample_id,
-        "hit": False,
-        "first_hit_turn": None,
-        "best_rank": None,
+        "hit": first_hit_turn is not None,
+        "first_hit_turn": first_hit_turn,
+        "best_rank": best_rank,
         "override_seen": override_seen,
+        "override_turn": override_turn,
+        "override_preferences": override_preferences or {},
+        "override_query": override_query or "",
         "active_preferences": preferences,
         "query": query,
         "old_value": old_value,
         "new_value": new_value,
+        "turns": turn_records,
     }
     if verbose:
-        print("\nDEMO RESULT: MISS")
+        if result["hit"]:
+            print("\nDEMO RESULT: OFFICIAL HIT after intent override")
+            print(f"First hit turn: {first_hit_turn} | Rank: {best_rank}")
+        else:
+            print("\nDEMO RESULT: OFFICIAL MISS")
         print("=" * 72)
     return result
 

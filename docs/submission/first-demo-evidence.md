@@ -8,13 +8,15 @@ Status: accepted locally on 2026-08-29.
 python demo/run_demo.py
 ```
 
-Expected deterministic result for `public_0072`:
+Expected deterministic result for `public_0183`:
 
 - scenario: Intent Override;
-- correction arrives on turn 3;
-- old value `Department: womens` is removed from active state;
-- new value `Faux Fur` is present in active state;
-- target is rank 1 after the correction.
+- turns 1-3: target rank displays "Not scored until intent override";
+- override arrives on turn 4: old values `Hand Wash Only` + `100% Polyester`
+  are removed from active state, new value `polyester` is present;
+- turn 4: target not in Top 10 (override just applied);
+- turn 5: target enters Top 10 at rank 8;
+- first hit turn: 5 — consistent with per-turn display (no contradiction).
 
 ## Reproduction gates
 
@@ -25,7 +27,7 @@ python scripts/team_gate.py --full-eval
 
 Accepted local results:
 
-- tests: 19/19 passed with no `ResourceWarning`;
+- tests: 29/29 passed with no `ResourceWarning`;
 - public sessions: 200;
 - HitRate@10: 0.91;
 - MRR: 0.624024;
@@ -38,17 +40,15 @@ JSON remains ignored; reviewers must reproduce it from the commands above.
 
 ## Fresh-checkout proof
 
-At commit `6175dfe`, an independent detached worktree containing no local
-catalog successfully ran, in order:
+Historical baseline (`6175dfe`): an independent detached worktree ran
+`setup_data.py`, `run_demo.py`, all tests, and the quick team gate. That
+commit used the previous sample (`public_0072`) which had a display
+contradiction fixed in TASK-202.
 
-1. `python scripts/setup_data.py` against the organizer release;
-2. `python demo/run_demo.py`;
-3. all tests present at that commit;
-4. the quick team gate.
-
-The temporary worktree was removed after verification. This proves that the
-demo does not depend on the commander's existing checkout or a teammate copying
-an untracked catalog by hand.
+Current proof: at the TASK-202 commit, the same sequence was re-run with
+`public_0183`. The demo displays "Not scored until intent override" before the
+override and reports `First hit turn: 5 | Rank: 8` after — consistent with
+per-turn output.
 
 The subsequent lifecycle gate adds deterministic, idempotent cleanup of the
 in-memory SQLite index. A full 200-session re-evaluation after that change kept
