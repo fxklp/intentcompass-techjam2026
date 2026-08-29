@@ -27,7 +27,7 @@ python scripts/team_gate.py --full-eval
 
 Accepted local results:
 
-- tests: 28/28 passed with no `ResourceWarning`;
+- tests: 29/29 passed with no `ResourceWarning`;
 - public sessions: 200;
 - HitRate@10: 0.91;
 - MRR: 0.624024;
