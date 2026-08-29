@@ -90,12 +90,13 @@ class TestWhitespaceGateFileIO(unittest.TestCase):
     def test_4_nonexistent_or_nontext_ignored(self):
         """4. 不存在的文件或非文本文件会被安全忽略"""
         test_file_img = self.root_path / "image.png"
-        test_file_img.write_bytes(b"fake image data")
+        # 1. 按照 Review 要求，改成带行尾空格的合法 UTF-8
+        test_file_img.write_bytes(b"fake image data \n")
 
         with patch('scripts.team_gate.ROOT', self.root_path):
-            # 传入不存在的 missing.txt 和非文本的 image.png
-            violations = check_text_whitespace({"missing.txt", "image.png"})
-            self.assertEqual(len(violations), 0)
+            # 2. 按照 Review 要求，分别断言 PNG 和不存在的文件，避免混在一起
+            self.assertEqual(check_text_whitespace({"image.png"}), [])
+            self.assertEqual(check_text_whitespace({"missing.txt"}), [])
 
 
 if __name__ == "__main__":
