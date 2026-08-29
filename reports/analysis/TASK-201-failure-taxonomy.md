@@ -4,9 +4,9 @@
 
 - Baseline commit: `ccd58846a286ae1f102c28388ffe8364787df764` (`ccd5884`).
 - Evaluator result: `reports/analysis/evidence/team-gate-results.json`.
-- Evaluator result SHA-256: `992666033582306a9c759b2d0702c76a59809983fadac7a3a66dc4ac19946824`.
+- Evaluator result Canonical-LF SHA-256: `ae84d065217f218d10fa44096c3f7ad1eecce3f9be34118ed8f2317422af63e1`.
 - Public metadata: `data/public_set.jsonl`.
-- Public metadata SHA-256: `571359a8a69014c43fc30d39c996c4a28e875dccc249dffc707358757beb16c0`.
+- Public metadata Canonical-LF SHA-256: `857259f7a438e6188ac63e18995b6ff4489bfcfc4a716a798b9a2aa0ee8f7579`.
 - Evaluated sessions: 200.
 - The report aggregates metadata only; it emits no sample identifiers or target products.
 

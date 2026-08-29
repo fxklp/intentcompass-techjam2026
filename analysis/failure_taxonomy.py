@@ -97,12 +97,10 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def canonical_lf_sha256(path: Path) -> str:
+    raw = path.read_bytes()
+    normalized = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(normalized).hexdigest()
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -256,9 +254,9 @@ def observable_evidence_section(failures: list[dict[str, Any]]) -> list[str]:
 def markdown_report(
     *,
     result_path: Path,
-    result_sha256: str,
+    result_canonical_sha256: str,
     public_path: Path,
-    public_sha256: str,
+    public_canonical_sha256: str,
     baseline_commit: str,
     result: dict[str, Any],
     public_records: dict[str, dict[str, Any]],
@@ -288,9 +286,9 @@ def markdown_report(
         "",
         f"- Baseline commit: `{baseline_commit}` (`{baseline_commit[:7]}`).",
         f"- Evaluator result: `{result_path.as_posix()}`.",
-        f"- Evaluator result SHA-256: `{result_sha256}`.",
+        f"- Evaluator result Canonical-LF SHA-256: `{result_canonical_sha256}`.",
         f"- Public metadata: `{public_path.as_posix()}`.",
-        f"- Public metadata SHA-256: `{public_sha256}`.",
+        f"- Public metadata Canonical-LF SHA-256: `{public_canonical_sha256}`.",
         f"- Evaluated sessions: {result['sample_count']}.",
         "- The report aggregates metadata only; it emits no sample identifiers or target products.",
         "",
@@ -437,9 +435,9 @@ def main() -> int:
     )
     report = markdown_report(
         result_path=args.result,
-        result_sha256=sha256(args.result),
+        result_canonical_sha256=canonical_lf_sha256(args.result),
         public_path=args.public_set,
-        public_sha256=sha256(args.public_set),
+        public_canonical_sha256=canonical_lf_sha256(args.public_set),
         baseline_commit=args.baseline_commit,
         result=result,
         public_records=public_records,
@@ -449,9 +447,9 @@ def main() -> int:
         cross_failures=cross_failures,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(report, encoding="utf-8", newline="\n")
+    args.output.write_text(report, encoding="utf-8")
     print(f"Wrote {args.output.as_posix()}")
-    print(f"Evaluator result SHA-256: {sha256(args.result)}")
+    print(f"Evaluator result Canonical-LF SHA-256: {canonical_lf_sha256(args.result)}")
     print(
         "Failures: "
         + ", ".join(
