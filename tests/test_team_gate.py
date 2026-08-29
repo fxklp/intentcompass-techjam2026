@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from scripts.team_gate import evaluation_threshold_violations
+from scripts.team_gate import evaluation_threshold_violations, trailing_whitespace_lines
 
 
 PASSING_RESULT = {
@@ -36,6 +36,10 @@ class TeamGateThresholdTest(unittest.TestCase):
         self.assertIn("TechnicalScore must be >= 0.60", violations)
         self.assertIn("boundary HitRate@10 must be >= 0.60", violations)
         self.assertIn("missing scenario metrics: intent_override", violations)
+
+    def test_trailing_whitespace_detection_covers_markdown_breaks_and_tabs(self) -> None:
+        content = "clean\nmarkdown break  \ntrailing tab\t\nclean again\n"
+        self.assertEqual(trailing_whitespace_lines(content), [2, 3])
 
 
 if __name__ == "__main__":
