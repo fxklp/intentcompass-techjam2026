@@ -28,6 +28,11 @@ SECRET_PATTERNS = {
     ),
 }
 OFFICIAL_BASE_COMMIT = "34078351e1c3615e5505a2e829600b56a542e462"
+EXPECTED_PUBLIC_SESSIONS = 200
+MIN_HIT_RATE_AT_10 = 0.75
+MIN_TECHNICAL_SCORE = 0.60
+MIN_SCENARIO_HIT_RATE_AT_10 = 0.60
+EXPECTED_SCENARIOS = {"boundary", "browsing", "buying", "intent_override"}
 
 
 def run(command: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
@@ -144,6 +149,45 @@ def syntax_check() -> list[str]:
     return violations
 
 
+def evaluation_threshold_violations(result: dict) -> list[str]:
+    violations = []
+    if result.get("sample_count") != EXPECTED_PUBLIC_SESSIONS:
+        violations.append(
+            f"official evaluation must contain {EXPECTED_PUBLIC_SESSIONS} sessions"
+        )
+
+    hit_rate = result.get("hit_rate_at_10")
+    if not isinstance(hit_rate, (int, float)) or hit_rate < MIN_HIT_RATE_AT_10:
+        violations.append(
+            f"HitRate@10 must be >= {MIN_HIT_RATE_AT_10:.2f}; got {hit_rate!r}"
+        )
+
+    technical_score = result.get("recommended_technical_score")
+    if not isinstance(technical_score, (int, float)) or technical_score < MIN_TECHNICAL_SCORE:
+        violations.append(
+            f"TechnicalScore must be >= {MIN_TECHNICAL_SCORE:.2f}; got {technical_score!r}"
+        )
+
+    scenario_metrics = result.get("scenario_metrics")
+    if not isinstance(scenario_metrics, dict):
+        return [*violations, "scenario_metrics must be an object"]
+    missing = EXPECTED_SCENARIOS - set(scenario_metrics)
+    if missing:
+        violations.append(f"missing scenario metrics: {', '.join(sorted(missing))}")
+    for scenario in sorted(EXPECTED_SCENARIOS & set(scenario_metrics)):
+        metrics = scenario_metrics.get(scenario)
+        scenario_hit_rate = metrics.get("hit_rate_at_10") if isinstance(metrics, dict) else None
+        if (
+            not isinstance(scenario_hit_rate, (int, float))
+            or scenario_hit_rate < MIN_SCENARIO_HIT_RATE_AT_10
+        ):
+            violations.append(
+                f"{scenario} HitRate@10 must be >= "
+                f"{MIN_SCENARIO_HIT_RATE_AT_10:.2f}; got {scenario_hit_rate!r}"
+            )
+    return violations
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Track 4 team quality gate")
     parser.add_argument("--full-eval", action="store_true", help="also run the official public evaluator")
@@ -199,9 +243,11 @@ def main() -> int:
             violations.append("official public evaluation failed")
         elif output.exists():
             try:
-                json.loads(output.read_text(encoding="utf-8"))
+                result = json.loads(output.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError) as exc:
                 violations.append(f"evaluation output is invalid JSON: {exc}")
+            else:
+                violations += evaluation_threshold_violations(result)
 
     if violations:
         print("\nTEAM GATE FAILED")

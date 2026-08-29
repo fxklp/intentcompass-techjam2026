@@ -14,7 +14,8 @@ Reviewer: Liu Chunyi
 
 Every pull request automatically downloads and verifies the official catalog,
 runs local policy and contract checks, executes all tests and 200 public
-sessions, and retains the score JSON. Official protected files are compared to
+sessions, enforces the P0 public score thresholds, benchmarks runtime, and
+retains both evidence JSON files. Official protected files are compared to
 the immutable organizer base commit rather than the mutable team `origin/main`.
 
 ## Proof

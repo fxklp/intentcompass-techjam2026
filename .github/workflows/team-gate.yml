@@ -36,11 +36,16 @@ jobs:
       - name: Run tests, policy checks, and all 200 public sessions
         run: python scripts/team_gate.py --full-eval
 
+      - name: Measure runtime disclosure
+        run: python scripts/benchmark_runtime.py
+
       - name: Preserve evaluator evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: team-gate-${{ github.sha }}
-          path: reports/generated/team-gate-results.json
+          path: |
+            reports/generated/team-gate-results.json
+            reports/generated/runtime-benchmark.json
           if-no-files-found: ignore
           retention-days: 14
