@@ -1,0 +1,46 @@
+name: team-gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: team-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-evaluator:
+    name: full-evaluator
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Download and verify official catalog
+        run: python scripts/setup_data.py
+
+      - name: Run tests, policy checks, and all 200 public sessions
+        run: python scripts/team_gate.py --full-eval
+
+      - name: Preserve evaluator evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: team-gate-${{ github.sha }}
+          path: reports/generated/team-gate-results.json
+          if-no-files-found: ignore
+          retention-days: 14

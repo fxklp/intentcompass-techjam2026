@@ -27,6 +27,7 @@ SECRET_PATTERNS = {
         r"(?i)\b(api[_-]?key|access[_-]?token|secret)\b\s*[:=]\s*['\"][^'\"]{12,}['\"]"
     ),
 }
+OFFICIAL_BASE_COMMIT = "34078351e1c3615e5505a2e829600b56a542e462"
 
 
 def run(command: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
@@ -52,9 +53,9 @@ def changed_paths() -> set[str]:
     paths |= git_lines("diff", "--name-only")
     paths |= git_lines("diff", "--cached", "--name-only")
     paths |= git_lines("ls-files", "--others", "--exclude-standard")
-    base = run(["git", "rev-parse", "--verify", "origin/main"], capture=True)
+    base = run(["git", "cat-file", "-e", f"{OFFICIAL_BASE_COMMIT}^{{commit}}"], capture=True)
     if base.returncode == 0:
-        paths |= git_lines("diff", "--name-only", "origin/main...HEAD")
+        paths |= git_lines("diff", "--name-only", f"{OFFICIAL_BASE_COMMIT}...HEAD")
     return paths
 
 
@@ -155,11 +156,17 @@ def main() -> int:
     diff_check = run(["git", "diff", "--check"])
     if diff_check.returncode != 0:
         violations.append("git diff --check failed")
-    base = run(["git", "rev-parse", "--verify", "origin/main"], capture=True)
-    if base.returncode == 0:
-        committed_diff_check = run(["git", "diff", "--check", "origin/main...HEAD"])
+    base = run(["git", "cat-file", "-e", f"{OFFICIAL_BASE_COMMIT}^{{commit}}"], capture=True)
+    if base.returncode != 0:
+        violations.append(
+            "official base commit is unavailable; use a full-history clone/fetch before gating"
+        )
+    else:
+        committed_diff_check = run(
+            ["git", "diff", "--check", f"{OFFICIAL_BASE_COMMIT}...HEAD"]
+        )
         if committed_diff_check.returncode != 0:
-            violations.append("committed diff check against origin/main failed")
+            violations.append("committed diff check against official base failed")
 
     violations += syntax_check()
 
