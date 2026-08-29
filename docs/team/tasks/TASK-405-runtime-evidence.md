@@ -11,6 +11,7 @@ Reviewer: Cheng Xianyun
 - `scripts/team_gate.py`
 - `.github/workflows/team-gate.yml`
 - `docs/submission/first-version-report.md`
+- `reports/metrics/first-version-runtime.json`
 - `docs/team/tasks/TASK-405-runtime-evidence.md`
 
 ## Outcome

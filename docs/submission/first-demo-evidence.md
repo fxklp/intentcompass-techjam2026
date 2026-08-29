@@ -25,7 +25,7 @@ python scripts/team_gate.py --full-eval
 
 Accepted local results:
 
-- tests: 15/15 passed with no `ResourceWarning`;
+- tests: 19/19 passed with no `ResourceWarning`;
 - public sessions: 200;
 - HitRate@10: 0.91;
 - MRR: 0.624024;
@@ -53,3 +53,6 @@ an untracked catalog by hand.
 The subsequent lifecycle gate adds deterministic, idempotent cleanup of the
 in-memory SQLite index. A full 200-session re-evaluation after that change kept
 all metrics identical.
+
+The current full gate also fails automatically if overall HitRate@10 falls
+below 0.75, TechnicalScore below 0.60, or any scenario HitRate@10 below 0.60.

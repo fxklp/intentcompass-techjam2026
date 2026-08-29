@@ -61,10 +61,10 @@ Runtime evidence is generated, rather than typed manually, with:
 python scripts/benchmark_runtime.py
 ```
 
-See `reports/generated/runtime-benchmark.json` for the measured machine,
-commit, workload, initialization time, and mean/p50/p95/p99/max response latency.
-On the first Windows/Python 3.13 reference run, 833 `respond` calls averaged
-37.899 ms with p95 77.360 ms; Agent initialization took 2.925 seconds. These
+See `reports/metrics/first-version-runtime.json` for the accepted clean-worktree
+measurement and `reports/generated/runtime-benchmark.json` for the latest local
+run. At commit `4247815` on Windows/Python 3.13, 833 `respond` calls averaged
+37.736 ms with p95 76.583 ms; Agent initialization took 2.933 seconds. These
 numbers are machine-specific and must be regenerated on the final environment.
 
 ## Demonstrated session
