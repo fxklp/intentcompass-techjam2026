@@ -53,7 +53,9 @@ At the accepted first-version baseline:
 A deterministic 200-target catalog shadow evaluation excludes every public
 target and keeps the official 80/80/30/10 scenario mix. It reached HitRate@10
 0.895 and TechnicalScore 0.780546. Run `python scripts/shadow_evaluator.py`;
-this is robustness evidence, not an official score.
+the accepted clean-worktree summary is in
+`reports/metrics/first-version-shadow.json`. This is robustness evidence, not
+an official score.
 
 Runtime evidence is generated, rather than typed manually, with:
 

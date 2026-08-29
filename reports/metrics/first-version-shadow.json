@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "commit": "4ea2cff794318baa5e05ab77e089f2997edbc3cc",
+  "working_tree_dirty": false,
+  "method": "official deterministic simulator over catalog targets excluded from public_set",
+  "seed": "intentcompass-shadow-v1",
+  "target_ids_sha256": "df040c3f8cd1444177d6c70d216016513c08b49d5a122316ec3b8c372d9dfdcb",
+  "public_target_overlap": 0,
+  "scenario_counts": {
+    "boundary": 10,
+    "browsing": 80,
+    "buying": 80,
+    "intent_override": 30
+  },
+  "metrics": {
+    "sample_count": 200,
+    "hit_rate_at_10": 0.895,
+    "mrr": 0.630488,
+    "mttc": 3.805,
+    "efficiency": 0.7195,
+    "recommended_technical_score": 0.780546,
+    "reported_token_usage": {
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "total_tokens": 0
+    },
+    "scenario_metrics": {
+      "boundary": {
+        "sample_count": 10,
+        "hit_rate_at_10": 0.9,
+        "mrr": 0.708333,
+        "mttc": 4.9
+      },
+      "browsing": {
+        "sample_count": 80,
+        "hit_rate_at_10": 0.9,
+        "mrr": 0.697187,
+        "mttc": 3.4
+      },
+      "buying": {
+        "sample_count": 80,
+        "hit_rate_at_10": 0.9125,
+        "mrr": 0.570372,
+        "mttc": 2.975
+      },
+      "intent_override": {
+        "sample_count": 30,
+        "hit_rate_at_10": 0.833333,
+        "mrr": 0.586984,
+        "mttc": 6.733333
+      }
+    }
+  }
+}
