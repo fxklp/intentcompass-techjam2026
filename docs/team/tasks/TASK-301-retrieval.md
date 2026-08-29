@@ -1,6 +1,6 @@
 # TASK-301: candidate retrieval boundary and baseline wrapper
 
-Owner: Wang Siwen  
+Owner: Wang Siwen
 Reviewer: Team-lead automation Agent
 
 ## Allowed paths

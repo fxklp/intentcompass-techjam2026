@@ -1,6 +1,6 @@
 # TASK-201: baseline failure analysis and evidence ledger
 
-Owner: Cheng Xianyun  
+Owner: Cheng Xianyun
 Reviewer: Liu Chunyi
 
 ## Allowed paths

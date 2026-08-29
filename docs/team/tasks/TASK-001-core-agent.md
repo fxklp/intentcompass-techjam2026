@@ -1,7 +1,7 @@
 # TASK-001: offline core Agent scaffold
 
-Owner: Team-lead dedicated automation Agent  
-Reviewer: Liu Chunyi  
+Owner: Team-lead dedicated automation Agent
+Reviewer: Liu Chunyi
 Timebox: 4 hours
 
 ## Outcome

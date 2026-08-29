@@ -1,6 +1,6 @@
 # IntentCompass architecture contract
 
-Status: **frozen for parallel implementation**  
+Status: **frozen for parallel implementation**
 Contract owner: Team lead / integration Agent
 
 ## Product statement

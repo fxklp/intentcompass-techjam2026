@@ -1,6 +1,6 @@
 # TASK-101: evaluation and regression harness
 
-Owner: Liu Chunyi  
+Owner: Liu Chunyi
 Reviewer: Team lead
 
 ## Allowed paths

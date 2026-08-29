@@ -151,6 +151,11 @@ def main() -> int:
     diff_check = run(["git", "diff", "--check"])
     if diff_check.returncode != 0:
         violations.append("git diff --check failed")
+    base = run(["git", "rev-parse", "--verify", "origin/main"], capture=True)
+    if base.returncode == 0:
+        committed_diff_check = run(["git", "diff", "--check", "origin/main...HEAD"])
+        if committed_diff_check.returncode != 0:
+            violations.append("committed diff check against origin/main failed")
 
     violations += syntax_check()
 
