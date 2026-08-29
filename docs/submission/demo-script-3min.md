@@ -42,4 +42,4 @@ model tokens.
 
 “The demo proves the core mechanism, not a hard-coded happy path: the same
 Agent passes the full evaluator, and an independent 200-target non-public-catalog
-shadow set also reached HitRate@10 0.91.”
+shadow set reached HitRate@10 0.895 with zero overlap with public targets.”

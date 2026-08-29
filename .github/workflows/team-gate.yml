@@ -39,6 +39,9 @@ jobs:
       - name: Measure runtime disclosure
         run: python scripts/benchmark_runtime.py
 
+      - name: Run non-public-target shadow gate
+        run: python scripts/shadow_evaluator.py
+
       - name: Preserve evaluator evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -47,5 +50,6 @@ jobs:
           path: |
             reports/generated/team-gate-results.json
             reports/generated/runtime-benchmark.json
+            reports/generated/shadow-results.json
           if-no-files-found: ignore
           retention-days: 14

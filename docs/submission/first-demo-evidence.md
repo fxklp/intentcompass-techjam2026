@@ -56,3 +56,8 @@ all metrics identical.
 
 The current full gate also fails automatically if overall HitRate@10 falls
 below 0.75, TechnicalScore below 0.60, or any scenario HitRate@10 below 0.60.
+
+`python scripts/shadow_evaluator.py` separately evaluates 200 deterministic
+catalog targets with zero public-target overlap and the official scenario mix.
+The accepted reproducible result is HitRate@10 0.895 and TechnicalScore
+0.780546; the shadow command fails below HitRate@10 0.70.

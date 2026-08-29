@@ -50,10 +50,10 @@ At the accepted first-version baseline:
 - Buying/Browsing/Intent Override/Boundary HitRate@10:
   0.925/0.95/0.766667/0.9.
 
-An independent 200-target catalog shadow evaluation, excluding every public
-target and keeping the official scenario proportions, also reached HitRate@10
-0.91 and TechnicalScore 0.804501. It is robustness evidence, not an official
-score.
+A deterministic 200-target catalog shadow evaluation excludes every public
+target and keeps the official 80/80/30/10 scenario mix. It reached HitRate@10
+0.895 and TechnicalScore 0.780546. Run `python scripts/shadow_evaluator.py`;
+this is robustness evidence, not an official score.
 
 Runtime evidence is generated, rather than typed manually, with:
 
