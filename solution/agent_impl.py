@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import weakref
 from pathlib import Path
 
 from solution.contracts import AgentResponse, Candidate, RetrievalRequest, flatten_text
@@ -32,9 +33,14 @@ class _BaselineBM25Index:
 
     def __init__(self, catalog_path: Path) -> None:
         self.connection = sqlite3.connect(":memory:")
+        self._finalizer = weakref.finalize(self, self.connection.close)
         self.products: dict[str, tuple[str, float | None, float, int]] = {}
         self.fallback_ids: list[str] = []
         self._build(catalog_path)
+
+    def close(self) -> None:
+        """Release the in-memory FTS index; safe to call more than once."""
+        self._finalizer()
 
     def _build(self, catalog_path: Path) -> None:
         cursor = self.connection.cursor()
@@ -129,6 +135,9 @@ class Agent:
     def reset(self, session_id: str, user_profile: dict) -> None:
         normalized_id = str(session_id)
         self._sessions[normalized_id] = SessionState.create(normalized_id, user_profile)
+
+    def close(self) -> None:
+        self._retriever.close()
 
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
         normalized_id = str(session_id)

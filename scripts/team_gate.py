@@ -87,6 +87,7 @@ def check_secrets_and_sizes(paths: set[str]) -> list[str]:
 
 
 def contract_smoke() -> list[str]:
+    agent = None
     try:
         from starter.agent import Agent
 
@@ -95,6 +96,9 @@ def contract_smoke() -> list[str]:
         payload = agent.respond("team-gate-smoke", "comfortable black shoes", 1, 10)
     except Exception as exc:  # noqa: BLE001 - gate must report any integration failure
         return [f"Agent smoke test failed: {exc}"]
+    finally:
+        if agent is not None:
+            agent.close()
 
     violations = []
     if not isinstance(payload, dict):
@@ -159,9 +163,18 @@ def main() -> int:
 
     violations += syntax_check()
 
-    tests = run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"])
+    tests = run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
+        capture=True,
+    )
+    if tests.stdout:
+        print(tests.stdout, end="")
+    if tests.stderr:
+        print(tests.stderr, end="", file=sys.stderr)
     if tests.returncode != 0:
         violations.append("unit tests failed")
+    if "ResourceWarning" in f"{tests.stdout}\n{tests.stderr}":
+        violations.append("unit tests emitted a ResourceWarning")
 
     violations += contract_smoke()
 

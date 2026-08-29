@@ -47,7 +47,12 @@ class AgentTest(unittest.TestCase):
         self.agent = Agent(self.catalog_path)
 
     def tearDown(self) -> None:
+        self.agent.close()
         self.temporary_directory.cleanup()
+
+    def test_close_is_idempotent(self) -> None:
+        self.agent.close()
+        self.agent.close()
 
     def test_browsing_turn_preserves_baseline_order_and_returns_valid_schema(self) -> None:
         self.agent.reset("session", {})
