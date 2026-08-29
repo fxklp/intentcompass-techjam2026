@@ -19,18 +19,21 @@ Explain that this uses the real `starter.Agent` and official customer
 simulator. The harness knows the labeled public target only to show rank; the
 Agent receives no ground truth.
 
-## 0:40-1:30 — Turns 1 and 2
+## 0:40-1:30 — Turns 1-3 (before override)
 
 Point to the customer message, active state, search query, chosen clarification,
-and ordered Top 10. Explain that “no additional preference” does not invent a
-constraint.
+and ordered Top 10. Note that `Target rank` displays “Not scored until intent
+override” — the harness does not reveal the final target's position before the
+override, matching the official evaluator's scoring gate.
 
-## 1:30-2:15 — Intent override
+## 1:30-2:15 — Intent override and hit
 
-On turn 3, point to the correction from `Department: womens` to `Faux Fur`.
-Show that active state contains only `Faux Fur`: the stale preference was
-removed, not merely appended to the query. Then show target rank 1 after the
-correction.
+On turn 4, the customer overrides their earlier preference from `Hand Wash Only`
++ `100% Polyester` to just `polyester`. Show that active state drops the stale
+slots and retains only `polyester`. The target does not appear in Top 10 on
+turn 4. On turn 5, after the customer adds `Button closure` + `Hand Wash Only`,
+the target enters Top 10 at rank 8. `First hit turn: 5` matches exactly — no
+contradiction between per-turn display and the final summary.
 
 ## 2:15-2:45 — Evaluation evidence
 
