@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from scripts.team_gate import evaluation_threshold_violations, trailing_whitespace_lines
+import tempfile
+
+from pathlib import Path
+
+from unittest.mock import patch
+
+from scripts.team_gate import evaluation_threshold_violations, trailing_whitespace_lines, check_text_whitespace
 
 
 PASSING_RESULT = {
@@ -40,6 +46,57 @@ class TeamGateThresholdTest(unittest.TestCase):
     def test_trailing_whitespace_detection_covers_markdown_breaks_and_tabs(self) -> None:
         content = "clean\nmarkdown break  \ntrailing tab\t\nclean again\n"
         self.assertEqual(trailing_whitespace_lines(content), [2, 3])
+
+
+class TestWhitespaceGateFileIO(unittest.TestCase):
+    def setUp(self):
+        # 创建临时目录存放测试文件，保证"实际读取"且不污染代码库
+        self.test_dir = tempfile.TemporaryDirectory()
+        self.root_path = Path(self.test_dir.name)
+
+    def tearDown(self):
+        self.test_dir.cleanup()
+
+    def test_1_detect_trailing_whitespace_in_utf8_file(self):
+        """1. 实际读取临时 UTF-8 文件并发现行尾空格、Tab"""
+        test_file = self.root_path / "bad_file.txt"
+        test_file.write_text("line1 \nline2\t\nline3", encoding="utf-8")
+
+        with patch('scripts.team_gate.ROOT', self.root_path):
+            violations = check_text_whitespace({"bad_file.txt"})
+            self.assertEqual(len(violations), 2)
+            self.assertTrue(any("bad_file.txt:1" in v for v in violations))
+            self.assertTrue(any("bad_file.txt:2" in v for v in violations))
+
+    def test_2_normal_file_returns_empty(self):
+        """2. 正常文件返回空结果"""
+        test_file = self.root_path / "clean_file.txt"
+        test_file.write_text("line1\nline2\nline3", encoding="utf-8")
+
+        with patch('scripts.team_gate.ROOT', self.root_path):
+            violations = check_text_whitespace({"clean_file.txt"})
+            self.assertEqual(len(violations), 0)
+
+    def test_3_invalid_utf8_safely_ignored(self):
+        """3. 无效 UTF-8 文件不会导致门禁崩溃"""
+        test_file = self.root_path / "invalid.txt"
+        # 故意写入非 UTF-8 编码的字节，触发 UnicodeDecodeError
+        test_file.write_bytes("测试乱码".encode("gbk"))
+
+        with patch('scripts.team_gate.ROOT', self.root_path):
+            violations = check_text_whitespace({"invalid.txt"})
+            self.assertEqual(len(violations), 0)
+
+    def test_4_nonexistent_or_nontext_ignored(self):
+        """4. 不存在的文件或非文本文件会被安全忽略"""
+        test_file_img = self.root_path / "image.png"
+        # 1. 按照 Review 要求，改成带行尾空格的合法 UTF-8
+        test_file_img.write_bytes(b"fake image data \n")
+
+        with patch('scripts.team_gate.ROOT', self.root_path):
+            # 2. 按照 Review 要求，分别断言 PNG 和不存在的文件，避免混在一起
+            self.assertEqual(check_text_whitespace({"image.png"}), [])
+            self.assertEqual(check_text_whitespace({"missing.txt"}), [])
 
 
 if __name__ == "__main__":
