@@ -1,6 +1,6 @@
 # TASK-102: whitespace gate file-level coverage
 
-Owner: Integration owner
+Owner: Liu Chunyi (L223233)
 Reviewer: Cheng Xianyun (shinecloud9)
 
 ## Allowed paths
