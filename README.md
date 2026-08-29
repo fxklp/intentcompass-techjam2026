@@ -23,14 +23,23 @@ The session ends when the target product appears in the scored Top 10 or after t
 
 ## Download the Catalog
 
-Download `catalog.jsonl.gz` from the GitHub Release attached to this repository, then run:
+The 60 MB extracted catalog is intentionally not stored in the team repository.
+Download it from the organizer's official `participant-kit` release and verify
+it with one cross-platform command:
 
 ```bash
-gzip -dk catalog.jsonl.gz
-mv catalog.jsonl data/catalog.jsonl
+python scripts/setup_data.py
 ```
 
-Verify the downloaded file using the published `SHA256SUMS` file.
+The script verifies the organizer-published archive checksum and the accepted
+extracted catalog checksum before placing it at `data/catalog.jsonl`. Source:
+[official participant kit](https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit).
+
+Then run the repeatable first demo:
+
+```bash
+python demo/run_demo.py
+```
 
 ## Run the Starter
 

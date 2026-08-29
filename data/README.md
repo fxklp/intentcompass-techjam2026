@@ -8,6 +8,9 @@ Each session contains a safe aggregate `user_profile` and public labels for loca
 
 ## `catalog.jsonl`
 
-Download `catalog.jsonl.gz` from the GitHub Release and decompress it as `catalog.jsonl` in this directory. Expected row count: 50,000.
+From the repository root, run `python scripts/setup_data.py`. It downloads
+`catalog.jsonl.gz` from the organizer's official `participant-kit` release,
+checks SHA-256, and decompresses it as `catalog.jsonl` in this directory.
+Expected row count: 50,000.
 
 Never place API keys, private evaluation data, or participant outputs in this directory.
