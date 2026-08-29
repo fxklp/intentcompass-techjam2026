@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -73,7 +74,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--result",
         type=Path,
-        default=Path("reports/generated/team-gate-results.json"),
+        default=Path("reports/analysis/evidence/team-gate-results.json"),
         help="Evaluator result JSON containing per-session outcomes.",
     )
     parser.add_argument(
@@ -132,11 +133,24 @@ def load_jsonl_by_id(path: Path) -> dict[str, dict[str, Any]]:
 def validate_commit(commit: str) -> None:
     if not 7 <= len(commit) <= 40 or any(character not in "0123456789abcdef" for character in commit.lower()):
         raise ValueError("baseline commit must be a 7-40 character hexadecimal Git revision")
+    try:
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
+            check=True, capture_output=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        raise ValueError(f"baseline commit {commit} not found in the local repository") from exc
 
 
 def analyze(
-    result: dict[str, Any], public_records: dict[str, dict[str, Any]]
-) -> tuple[list[dict[str, str]], Counter[str], Counter[str], dict[str, Counter[str]]]:
+    result: dict[str, Any],
+    public_records: dict[str, dict[str, Any]],
+) -> tuple[
+    list[dict[str, Any]],
+    Counter[str],
+    Counter[str],
+    dict[str, Counter[str]],
+]:
     sessions = result.get("sessions")
     if not isinstance(sessions, list):
         raise ValueError("result JSON must contain a sessions array")
@@ -144,7 +158,7 @@ def analyze(
         raise ValueError("result sample_count does not match the sessions array")
 
     seen_ids: set[str] = set()
-    failures: list[dict[str, str]] = []
+    failures: list[dict[str, Any]] = []
     for index, session in enumerate(sessions):
         if not isinstance(session, dict):
             raise ValueError(f"result session {index} must be an object")
@@ -170,7 +184,14 @@ def analyze(
         if not isinstance(session.get("hit"), bool):
             raise ValueError(f"result sample has a non-boolean hit field: {sample_id}")
         if not session["hit"]:
-            failures.append({"scenario": result_scenario, "difficulty": difficulty})
+            failures.append({
+                "scenario": result_scenario,
+                "difficulty": difficulty,
+                "best_rank": session.get("best_rank"),
+                "first_hit_turn": session.get("first_hit_turn"),
+                "reciprocal_rank": session.get("reciprocal_rank"),
+                "category": public_record.get("category_bucket"),
+            })
 
     if len(seen_ids) != len(public_records):
         raise ValueError(
@@ -202,6 +223,36 @@ def percentage(numerator: int, denominator: int) -> str:
     return f"{(100.0 * numerator / denominator):.2f}%" if denominator else "n/a"
 
 
+def observable_evidence_section(failures: list[dict[str, Any]]) -> list[str]:
+    null_rank = sum(1 for f in failures if f["best_rank"] is None)
+    null_turn = sum(1 for f in failures if f["first_hit_turn"] is None)
+    zero_rr = sum(1 for f in failures if f["reciprocal_rank"] == 0.0)
+    categories = Counter(f["category"] for f in failures)
+    total = len(failures)
+
+    lines = [
+        "## Observable evidence from failed sessions",
+        "",
+        "The evaluator records four session-level signals per sample: `hit`, `best_rank`, "
+        "`first_hit_turn`, and `reciprocal_rank`. Aggregating across the 18 failures:",
+        "",
+        "| Signal | Observation | Count |",
+        "| --- | --- | ---: |",
+        f"| `best_rank` | `null` (target never appeared in any recommendation list) | {null_rank}/{total} |",
+        f"| `first_hit_turn` | `null` (target never surfaced at any turn) | {null_turn}/{total} |",
+        f"| `reciprocal_rank` | `0.0` (complete recall miss) | {zero_rr}/{total} |",
+        f"| `category_bucket` | {', '.join(f'{c} ({n})' for c, n in categories.most_common())} | {total}/{total} |",
+        "",
+        "All 18 failures are **complete recall misses**: the target product was never retrieved "
+        "into any recommendation list at any conversational turn. The evaluator data contains "
+        "no partial-hit or near-miss signals that could differentiate failure mechanisms "
+        "across scenarios. Consequently, the failure classes below are hypotheses derived from "
+        "scenario metadata and difficulty concentration, not from fine-grained behavioral traces.",
+        "",
+    ]
+    return lines
+
+
 def markdown_report(
     *,
     result_path: Path,
@@ -211,7 +262,7 @@ def markdown_report(
     baseline_commit: str,
     result: dict[str, Any],
     public_records: dict[str, dict[str, Any]],
-    failures: list[dict[str, str]],
+    failures: list[dict[str, Any]],
     scenario_failures: Counter[str],
     difficulty_failures: Counter[str],
     cross_failures: dict[str, Counter[str]],
@@ -223,11 +274,11 @@ def markdown_report(
         str(record["difficulty_bucket"]) for record in public_records.values()
     )
     command = (
-        "python analysis/failure_taxonomy.py "
-        "--result reports/generated/team-gate-results.json "
-        "--public-set data/public_set.jsonl "
+        f"python analysis/failure_taxonomy.py "
+        f"--result {result_path.as_posix()} "
+        f"--public-set {public_path.as_posix()} "
         f"--baseline-commit {baseline_commit} "
-        "--output reports/analysis/TASK-201-failure-taxonomy.md"
+        f"--output reports/analysis/TASK-201-failure-taxonomy.md"
     )
 
     lines = [
@@ -235,7 +286,7 @@ def markdown_report(
         "",
         "## Evidence ledger",
         "",
-        f"- Baseline commit: `{baseline_commit}` (`ccd5884`).",
+        f"- Baseline commit: `{baseline_commit}` (`{baseline_commit[:7]}`).",
         f"- Evaluator result: `{result_path.as_posix()}`.",
         f"- Evaluator result SHA-256: `{result_sha256}`.",
         f"- Public metadata: `{public_path.as_posix()}`.",
@@ -250,7 +301,8 @@ def markdown_report(
         "```",
         "",
         "The script validates unique session identifiers, a complete one-to-one join with the public set, "
-        "scenario consistency, supported difficulty buckets, and the expected 18-failure breakdown. "
+        "scenario consistency, supported difficulty buckets, the expected 18-failure breakdown, and "
+        "that the baseline commit exists in the local repository. "
         "A mismatch exits non-zero instead of generating a report.",
         "",
         "## Failure classification",
@@ -268,11 +320,13 @@ def markdown_report(
             f"{percentage(observed, scenario_totals[scenario])} | {expected} | "
             f"{'Pass' if observed == expected else 'Fail'} |"
         )
+    total_pass = len(failures) == sum(EXPECTED_FAILURES.values())
     lines.extend(
         [
             f"| **Total** | **{len(public_records)}** | **{len(failures)}** | "
             f"**{percentage(len(failures), len(public_records))}** | "
-            f"**{sum(EXPECTED_FAILURES.values())}** | **Pass** |",
+            f"**{sum(EXPECTED_FAILURES.values())}** | "
+            f"**{'Pass' if total_pass else 'Fail'}** |",
             "",
             "### By difficulty",
             "",
@@ -308,14 +362,19 @@ def markdown_report(
         f"**{len(failures)}** |"
     )
 
+    lines.extend([""])
+    lines.extend(observable_evidence_section(failures))
+
     lines.extend(
         [
+            "## Top three failure-class hypotheses",
             "",
-            "## Top three general failure classes",
-            "",
-            "These are diagnostic classes supported by scenario and difficulty concentration, not "
-            "proof of a specific internal defect. The evaluator JSON records final outcomes but not "
-            "candidate-recall or reranker traces, so those mechanisms must be separated in a future experiment.",
+            "Because all 18 failures are complete recall misses with no differentiating "
+            "session-level signals (see above), these classes are **hypotheses** informed by "
+            "scenario metadata and difficulty concentration. They identify where failures cluster "
+            "and propose plausible mechanisms, but proving the actual internal defect requires "
+            "conversation-level traces and candidate-recall logs that the evaluator result does "
+            "not contain.",
             "",
         ]
     )
@@ -332,7 +391,7 @@ def markdown_report(
                 "",
                 f"Evidence slice: {scenarios}.",
                 "",
-                str(entry["interpretation"]),
+                f"Hypothesis: {entry['interpretation']}",
                 "",
                 f"General improvement direction: {entry['direction']}",
                 "",
@@ -341,6 +400,21 @@ def markdown_report(
 
     lines.extend(
         [
+            "## Limitations and next steps",
+            "",
+            "The evaluator result records only final outcomes (`hit`, `best_rank`, "
+            "`reciprocal_rank`). All 18 failures share identical signals (target never "
+            "retrieved), so scenario-level aggregation is the finest granularity available. "
+            "To upgrade these hypotheses into confirmed root causes, the following additional "
+            "evidence is needed:",
+            "",
+            "1. **Conversation traces**: full dialogue turns to observe where slot-filling "
+            "or clarification diverged from the user profile.",
+            "2. **Candidate-recall logs**: the retrieval stage's candidate set at each turn, "
+            "to separate recall failure from reranking failure.",
+            "3. **Query reconstruction diffs**: for Intent Override sessions, the before/after "
+            "query state to verify whether slot replacement occurred correctly.",
+            "",
             "## Interpretation boundary",
             "",
             "The taxonomy is suitable for prioritizing scenario-level experiments. It must not be used "
