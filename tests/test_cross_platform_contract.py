@@ -46,6 +46,11 @@ class TestCrossPlatformContract(unittest.TestCase):
             # 初始化临时 Git 仓库
             subprocess.run(["git", "init"], cwd=tmpdir, check=True, capture_output=True)
 
+            # --- 给 CI 的临时仓库一个身份 ---
+            subprocess.run(["git", "config", "user.name", "CI Bot"], cwd=tmpdir, check=True, capture_output=True)
+            subprocess.run(["git", "config", "user.email", "ci@example.com"], cwd=tmpdir, check=True,
+                           capture_output=True)
+
             # 伪造一个包含极易被 Windows Git 破坏的字节（\r\n 和 \n）的假二进制图片
             dummy_bytes = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR'
             png_file = tmp_path / "test_image.png"
