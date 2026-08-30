@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "task": "TASK-303-dual-route-inmemory",
+  "code_commit": "4af1b677b9d950a1435ab147d15451ab57fefba5",
+  "implementation": {
+    "runtime": "Python standard library and SQLite FTS5",
+    "external_dependencies_added": [],
+    "runtime_network_required": false,
+    "api_credentials_required": false,
+    "estimated_api_cost_usd": 0,
+    "generated_index_asset_bytes": 0,
+    "index_lifecycle": "rebuilt in memory from the frozen catalog at process start"
+  },
+  "catalog": {
+    "source": "official TechJam 2026 participant-kit release",
+    "source_url": "https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit",
+    "upstream": "Amazon Reviews 2023 Clothing_Shoes_and_Jewelry",
+    "license_note": "No new data source is introduced; use and redistribution remain governed by the organizer and upstream terms.",
+    "sha256": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+    "bytes": 60546327,
+    "download_and_verify": "python scripts/setup_data.py"
+  },
+  "dense_retrieval": {
+    "implemented": false,
+    "model": null,
+    "license": null,
+    "asset_sha256": null,
+    "reason": "The experiment uses genuine field-specific lexical routes; no vetted embedding asset was needed or represented as dense retrieval."
+  },
+  "evidence": {
+    "results": {
+      "path": "reports/experiments/TASK-303-results.json",
+      "sha256": "630e2519138ff849b0d7f4fc43954a8ca4dbb93f5782329ffd72747a4594419a"
+    },
+    "fixed_query_benchmark": {
+      "path": "reports/experiments/TASK-303-benchmark.json",
+      "sha256": "db67dfaecefd3118b7fd4588b0ccc7d162779472c5e789b22097f975a48d7a2e"
+    }
+  },
+  "reproduction": [
+    "python experiments/retrieval/evaluate.py --catalog data/catalog.jsonl --output reports/experiments/TASK-303-results.json",
+    "python scripts/benchmark_retrieval.py --catalog data/catalog.jsonl --iterations 20 --output reports/experiments/TASK-303-benchmark.json",
+    "python -m unittest discover -s tests/retrieval -p test_*.py -v",
+    "python scripts/team_gate.py"
+  ]
+}

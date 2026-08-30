@@ -1,0 +1,96 @@
+{
+  "baseline": {
+    "mode": "baseline",
+    "iterations": 20,
+    "cold_start_seconds": 2.544129,
+    "retrieval_ms_mean": 13.927533,
+    "retrieval_ms_p50": 13.5406,
+    "retrieval_ms_p95": 23.5188,
+    "peak_rss_bytes": 265625600,
+    "deterministic_top10_samples": [
+      [
+        "B08JKBXWT1",
+        "B07MM8XR7W",
+        "B07FBQ9652",
+        "B01LL0ORYM",
+        "B01MZ1V690",
+        "B07RW7WZT2",
+        "B08GS2TN8X",
+        "B011CIW1OQ",
+        "B08S7GZ8BT",
+        "B088QL39Q2"
+      ],
+      [
+        "B095J61VF7",
+        "B09FLD6GBZ",
+        "B093WHGPCW",
+        "B00DC2BTZS",
+        "B0725QQXSQ",
+        "B07JDRDVYZ",
+        "B00GNJX4BE",
+        "B08LPS431B",
+        "B08BYHLBF7",
+        "B079Z9LDNZ"
+      ],
+      [
+        "B07GJ9TJ9Z",
+        "B08P58ZXLR",
+        "B08BGCPGBG",
+        "B08MDRTL62",
+        "B09BZPRJTQ",
+        "B00G2G6R9E",
+        "B08P5G5NK8",
+        "B09K45CY6K",
+        "B0B2W6CY5F",
+        "B073XTGY2T"
+      ]
+    ]
+  },
+  "candidate": {
+    "mode": "candidate",
+    "iterations": 20,
+    "cold_start_seconds": 1.951371,
+    "retrieval_ms_mean": 57.776247,
+    "retrieval_ms_p50": 40.8405,
+    "retrieval_ms_p95": 108.2283,
+    "peak_rss_bytes": 267743232,
+    "deterministic_top10_samples": [
+      [
+        "B08JKBXWT1",
+        "B07MM8XR7W",
+        "B088QL39Q2",
+        "B07FBQ9652",
+        "B01LL0ORYM",
+        "B01MZ1V690",
+        "B08F211ZLL",
+        "B07RW7WZT2",
+        "B08GS2TN8X",
+        "B08S7GZ8BT"
+      ],
+      [
+        "B00DC2BTZS",
+        "B095J61VF7",
+        "B07JDRDVYZ",
+        "B09FLD6GBZ",
+        "B08LPS431B",
+        "B093WHGPCW",
+        "B0725QQXSQ",
+        "B0170P0174",
+        "B00GNJX4BE",
+        "B06XWGFDJ9"
+      ],
+      [
+        "B07GJ9TJ9Z",
+        "B011O8L190",
+        "B073XTGY2T",
+        "B08MDRTL62",
+        "B08P58ZXLR",
+        "B08BGCPGBG",
+        "B09K45CY6K",
+        "B09BZPRJTQ",
+        "B00G2G6R9E",
+        "B08P5G5NK8"
+      ]
+    ]
+  }
+}
