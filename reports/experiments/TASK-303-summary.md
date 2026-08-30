@@ -1,5 +1,10 @@
 # TASK-303 Buying/Browsing dual-route in-memory experiment
 
+> Remediation note: the public/shadow comparison and fixed-query benchmark were
+> rerun after the review fixes. Scenario Efficiency and TechnicalScore are now
+> generated in the raw JSON with the official formula and checked for weighted
+> consistency before evidence is written.
+
 ## Decision
 
 The conservative candidate meets all three minimum integration thresholds, but
@@ -47,22 +52,22 @@ reported HR, MRR, and MTTC.
 
 | Set/variant | Scenario | HR@10 | MRR | MTTC | TechnicalScore |
 |---|---|---:|---:|---:|---:|
-| Public baseline | Buying | 0.9250 | 0.613323 | 4.2750 | 0.846497 |
-| Public candidate | Buying | 0.9125 | 0.611483 | 4.2250 | 0.839695 |
-| Public baseline | Browsing | 0.9500 | 0.677808 | 3.0625 | 0.878342 |
-| Public candidate | Browsing | 0.9625 | 0.672951 | 2.8750 | 0.883135 |
-| Public baseline | Intent Override | 0.766667 | 0.513254 | 6.8000 | 0.537310 |
-| Public candidate | Intent Override | 0.766667 | 0.497976 | 6.8000 | 0.532726 |
-| Public baseline | Boundary | 0.9000 | 0.611667 | 6.0000 | 0.633500 |
-| Public candidate | Boundary | 0.9000 | 0.611667 | 6.0000 | 0.633500 |
-| Shadow baseline | Buying | 0.9125 | 0.570372 | 2.9750 | 0.827362 |
-| Shadow candidate | Buying | 0.9250 | 0.555526 | 2.8125 | 0.829158 |
-| Shadow baseline | Browsing | 0.9000 | 0.697187 | 3.4000 | 0.859156 |
-| Shadow candidate | Browsing | 0.9000 | 0.680188 | 3.4000 | 0.854056 |
-| Shadow baseline | Intent Override | 0.833333 | 0.586984 | 6.733333 | 0.592762 |
-| Shadow candidate | Intent Override | 0.833333 | 0.572077 | 6.566667 | 0.588290 |
-| Shadow baseline | Boundary | 0.9000 | 0.708333 | 4.9000 | 0.862500 |
-| Shadow candidate | Boundary | 0.9000 | 0.700000 | 4.8000 | 0.860000 |
+| Public baseline | Buying | 0.9250 | 0.613323 | 4.2750 | 0.780997 |
+| Public candidate | Buying | 0.9125 | 0.611483 | 4.2250 | 0.775195 |
+| Public baseline | Browsing | 0.9500 | 0.677808 | 3.0625 | 0.837092 |
+| Public candidate | Browsing | 0.9625 | 0.672951 | 2.8750 | 0.845635 |
+| Public baseline | Intent Override | 0.766667 | 0.513254 | 6.8000 | 0.621310 |
+| Public candidate | Intent Override | 0.766667 | 0.497976 | 6.8000 | 0.616726 |
+| Public baseline | Boundary | 0.9000 | 0.611667 | 6.0000 | 0.733500 |
+| Public candidate | Boundary | 0.9000 | 0.611667 | 6.0000 | 0.733500 |
+| Shadow baseline | Buying | 0.9125 | 0.570372 | 2.9750 | 0.787862 |
+| Shadow candidate | Buying | 0.9250 | 0.555526 | 2.8125 | 0.792908 |
+| Shadow baseline | Browsing | 0.9000 | 0.697187 | 3.4000 | 0.811156 |
+| Shadow candidate | Browsing | 0.9000 | 0.680188 | 3.4000 | 0.806056 |
+| Shadow baseline | Intent Override | 0.833333 | 0.586984 | 6.733333 | 0.678095 |
+| Shadow candidate | Intent Override | 0.833333 | 0.572077 | 6.566667 | 0.676956 |
+| Shadow baseline | Boundary | 0.9000 | 0.708333 | 4.9000 | 0.784500 |
+| Shadow candidate | Boundary | 0.9000 | 0.700000 | 4.8000 | 0.784000 |
 
 The largest HR movement is 0.0125: Public transfers one hit from Buying to
 Browsing, while Shadow adds one Buying hit. Override and Boundary HR do not
@@ -86,14 +91,14 @@ late, highly constrained calls, not displaced candidates.
 
 | Set | Variant | Cold start (s) | Retrieval p50/p95 (ms) | Respond p50/p95 (ms) | Peak RSS (MiB) |
 |---|---|---:|---:|---:|---:|
-| Public | baseline | 1.996 | 17.47 / 36.45 | 19.47 / 40.22 | 444.4 |
-| Public | candidate | 2.461 | 31.23 / 77.23 | 34.06 / 81.71 | 444.7 |
-| Shadow | baseline | 1.905 | 20.24 / 39.63 | 21.99 / 42.17 | 445.7 |
-| Shadow | candidate | 2.057 | 32.21 / 82.82 | 34.73 / 84.50 | 444.9 |
+| Public | baseline | 2.809 | 20.94 / 53.77 | 23.20 / 57.98 | 445.5 |
+| Public | candidate | 3.791 | 29.16 / 95.47 | 31.65 / 98.75 | 445.5 |
+| Shadow | baseline | 2.676 | 24.86 / 57.62 | 26.83 / 61.12 | 445.3 |
+| Shadow | candidate | 3.211 | 34.71 / 98.37 | 36.96 / 102.07 | 445.4 |
 
 Peak RSS includes evaluator catalog objects plus the in-memory FTS index. The
-fixed-query retrieval-only benchmark measured about 253 MiB baseline and 255
-MiB candidate peak RSS. The candidate creates no persisted index: generated
+fixed-query retrieval-only benchmark measured 253.1 MiB baseline and 253.5 MiB
+candidate peak RSS in separate processes. The candidate creates no persisted index: generated
 asset size is 0 bytes; the verified input catalog is 60,546,327 bytes.
 
 ## Reproduction
