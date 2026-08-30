@@ -79,16 +79,29 @@ class DualRouteInMemoryRetriever:
                 "use_case_fields": 0.7,
             }
 
-        nonempty = {name: rows for name, rows in routes.items() if rows}
-        fallback_used = not nonempty
-        if fallback_used:
-            nonempty = {
-                "popularity_fallback": [
-                    (parent_asin, 0.0) for parent_asin in self.index.fallback_ids[:limit]
-                ]
-            }
-            weights["popularity_fallback"] = 1.0
+        # The baseline query is the compatibility boundary. If it has no FTS
+        # match, return its deterministic popularity fallback directly; route-
+        # only matches must not replace or reorder that fallback.
+        if not routes["baseline_fts"]:
+            fallback_ids = self.index.fallback_ids[:limit]
+            candidates = tuple(
+                self._fallback_candidate(parent_asin, rank)
+                for rank, parent_asin in enumerate(fallback_ids)
+            )
+            return RetrievalResult(
+                candidates=candidates,
+                trace=RetrievalTrace(
+                    selected_path=selected_path,
+                    reason_codes=("no_fts_match", "deterministic_popularity_fallback"),
+                    routes=("popularity_fallback",),
+                    route_candidate_counts=(("popularity_fallback", len(candidates)),),
+                    query_terms=query_terms,
+                    expanded_terms=expansions,
+                    fallback_used=True,
+                ),
+            )
 
+        nonempty = {name: rows for name, rows in routes.items() if rows}
         candidates = self._fuse(
             nonempty,
             weights,
@@ -111,8 +124,19 @@ class DualRouteInMemoryRetriever:
                 ),
                 query_terms=query_terms,
                 expanded_terms=expansions,
-                fallback_used=fallback_used,
+                fallback_used=False,
             ),
+        )
+
+    def _fallback_candidate(self, parent_asin: str, rank: int) -> Candidate:
+        product = self.index.candidate_data(parent_asin)
+        return Candidate(
+            parent_asin=parent_asin,
+            retrieval_rank=rank,
+            retrieval_score=0.0,
+            searchable_text=product.searchable_text,
+            price=product.price,
+            categories=product.categories,
         )
 
     @staticmethod

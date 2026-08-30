@@ -203,6 +203,47 @@ class RetrieverTestCase(unittest.TestCase):
         finally:
             retriever.close()
 
+    def test_candidate_unmatched_query_ignores_matching_category_for_fallback(self) -> None:
+        baseline = BaselineFTS5Retriever(self.catalog)
+        candidate = DualRouteInMemoryRetriever(self.catalog)
+        request = RetrievalRequest(
+            query="zzzz-unmatched",
+            limit=3,
+            category="Shoes",
+            route_hint="browsing",
+        )
+        try:
+            baseline_result = baseline.search(
+                RetrievalRequest(query=request.query, limit=request.limit)
+            )
+            candidate_result = candidate.search(request)
+            expected_ids = [item.parent_asin for item in baseline_result.candidates]
+
+            self.assertEqual(["A1", "A4", "A2"], expected_ids)
+            self.assertEqual(
+                expected_ids,
+                [item.parent_asin for item in candidate_result.candidates],
+            )
+            self.assertEqual(
+                [item.retrieval_rank for item in baseline_result.candidates],
+                [item.retrieval_rank for item in candidate_result.candidates],
+            )
+            self.assertTrue(candidate_result.trace.fallback_used)
+            self.assertEqual(
+                ("popularity_fallback",), candidate_result.trace.routes
+            )
+            self.assertEqual(
+                (("popularity_fallback", 3),),
+                candidate_result.trace.route_candidate_counts,
+            )
+            self.assertEqual(
+                ("no_fts_match", "deterministic_popularity_fallback"),
+                candidate_result.trace.reason_codes,
+            )
+        finally:
+            baseline.close()
+            candidate.close()
+
     def test_baseline_unmatched_query_exactly_uses_legacy_popularity_fallback(self) -> None:
         legacy = _BaselineBM25Index(self.catalog)
         retriever = BaselineFTS5Retriever(self.catalog)
