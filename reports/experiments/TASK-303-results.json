@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task": "TASK-303-dual-route-inmemory",
-  "code_commit": "9a626733e0d83cfe266832b80579164b9908d131",
+  "code_commit": "0be74958a9833e1c6e2e0bd5a8db9abdc9c6ebcd",
   "environment": {
     "python": "3.14.5",
     "platform": "win32"
@@ -75,14 +75,14 @@
         "observed_turns": 833
       },
       "performance": {
-        "cold_start_seconds": 2.808526,
+        "cold_start_seconds": 2.424861,
         "retrieval_calls": 833,
-        "retrieval_ms_p50": 20.9404,
-        "retrieval_ms_p95": 53.7682,
-        "respond_ms_p50": 23.1971,
-        "respond_ms_p95": 57.9846,
-        "retrieval_ms_mean": 23.040478,
-        "peak_rss_bytes": 467136512
+        "retrieval_ms_p50": 18.9398,
+        "retrieval_ms_p95": 44.082,
+        "respond_ms_p50": 21.086,
+        "respond_ms_p95": 47.1089,
+        "retrieval_ms_mean": 19.887849,
+        "peak_rss_bytes": 466792448
       },
       "trace_examples": [
         {
@@ -1473,14 +1473,14 @@
         "observed_turns": 814
       },
       "performance": {
-        "cold_start_seconds": 3.791332,
+        "cold_start_seconds": 2.596176,
         "retrieval_calls": 814,
-        "retrieval_ms_p50": 29.1587,
-        "retrieval_ms_p95": 95.4701,
-        "respond_ms_p50": 31.6528,
-        "respond_ms_p95": 98.7508,
-        "retrieval_ms_mean": 38.583444,
-        "peak_rss_bytes": 467120128
+        "retrieval_ms_p50": 28.4133,
+        "retrieval_ms_p95": 81.1882,
+        "respond_ms_p50": 31.1734,
+        "respond_ms_p95": 86.0446,
+        "retrieval_ms_mean": 36.636371,
+        "peak_rss_bytes": 466034688
       },
       "trace_examples": [
         {
@@ -3119,14 +3119,14 @@
         "observed_turns": 740
       },
       "performance": {
-        "cold_start_seconds": 2.676207,
+        "cold_start_seconds": 2.592278,
         "retrieval_calls": 740,
-        "retrieval_ms_p50": 24.861,
-        "retrieval_ms_p95": 57.6164,
-        "respond_ms_p50": 26.8344,
-        "respond_ms_p95": 61.1181,
-        "retrieval_ms_mean": 26.236565,
-        "peak_rss_bytes": 466894848
+        "retrieval_ms_p50": 24.0969,
+        "retrieval_ms_p95": 53.5013,
+        "respond_ms_p50": 26.3782,
+        "respond_ms_p95": 56.5077,
+        "retrieval_ms_mean": 26.377832,
+        "peak_rss_bytes": 467042304
       },
       "trace_examples": [
         {
@@ -3857,14 +3857,14 @@
         "observed_turns": 722
       },
       "performance": {
-        "cold_start_seconds": 3.210684,
+        "cold_start_seconds": 2.529682,
         "retrieval_calls": 722,
-        "retrieval_ms_p50": 34.7142,
-        "retrieval_ms_p95": 98.369,
-        "respond_ms_p50": 36.9646,
-        "respond_ms_p95": 102.0692,
-        "retrieval_ms_mean": 42.415778,
-        "peak_rss_bytes": 467009536
+        "retrieval_ms_p50": 34.596,
+        "retrieval_ms_p95": 81.1519,
+        "respond_ms_p50": 36.4468,
+        "respond_ms_p95": 83.0031,
+        "retrieval_ms_mean": 39.564823,
+        "peak_rss_bytes": 467148800
       },
       "trace_examples": [
         {

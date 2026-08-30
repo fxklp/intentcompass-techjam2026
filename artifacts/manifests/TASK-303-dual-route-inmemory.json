@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task": "TASK-303-dual-route-inmemory",
-  "code_commit": "9a626733e0d83cfe266832b80579164b9908d131",
+  "code_commit": "0be74958a9833e1c6e2e0bd5a8db9abdc9c6ebcd",
   "implementation": {
     "runtime": "Python standard library and SQLite FTS5",
     "external_dependencies_added": [],
@@ -30,11 +30,11 @@
   "evidence": {
     "results": {
       "path": "reports/experiments/TASK-303-results.json",
-      "sha256": "76e929f1c53d56b6f9baad22604949b8c40be7f5e79e98e8598e7d88503d8875"
+      "sha256": "d3302588e9b89deb98de32e13070ce2d03825c2274bcec4e8173d74c986d7eca"
     },
     "fixed_query_benchmark": {
       "path": "reports/experiments/TASK-303-benchmark.json",
-      "sha256": "f047bd00d412e607bbe17ed140c261e549a8a1d500b190b5ec8fbd41458b070d"
+      "sha256": "9e69cb581c4d74f33cb8e489bcbc071f9fd5ee13fb48b660ca8ba3f0c6d31a30"
     }
   },
   "reproduction": [

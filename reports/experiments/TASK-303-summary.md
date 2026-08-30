@@ -1,9 +1,10 @@
 # TASK-303 Buying/Browsing dual-route in-memory experiment
 
-> Remediation note: the public/shadow comparison and fixed-query benchmark were
-> rerun after the review fixes. Scenario Efficiency and TechnicalScore are now
-> generated in the raw JSON with the official formula and checked for weighted
-> consistency before evidence is written.
+> Remediation note: the candidate now treats an empty baseline FTS route as the
+> compatibility boundary and directly returns the baseline's deterministic
+> popularity fallback, even when category or expanded routes match. The direct
+> candidate regression test checks fallback IDs, order, and trace. Public/shadow
+> and the independent-process benchmark were rerun from code commit `0be7495`.
 
 ## Decision
 
@@ -29,6 +30,9 @@ candidate and lets the independent routes alter ordering only.
   expansion, use-case-weighted FTS, and a deterministic category novelty bonus.
 - Weighted reciprocal-rank fusion is deterministic and retains the complete
   baseline candidate pool as a recall guard.
+- When baseline FTS has no match, candidate fusion and diversity are bypassed;
+  popularity IDs come from the existing shared in-memory catalog index in
+  exactly baseline order. No second index is built.
 - Dense retrieval is not implemented. No token-overlap component is described
   as dense or semantic retrieval.
 
@@ -91,15 +95,16 @@ late, highly constrained calls, not displaced candidates.
 
 | Set | Variant | Cold start (s) | Retrieval p50/p95 (ms) | Respond p50/p95 (ms) | Peak RSS (MiB) |
 |---|---|---:|---:|---:|---:|
-| Public | baseline | 2.809 | 20.94 / 53.77 | 23.20 / 57.98 | 445.5 |
-| Public | candidate | 3.791 | 29.16 / 95.47 | 31.65 / 98.75 | 445.5 |
-| Shadow | baseline | 2.676 | 24.86 / 57.62 | 26.83 / 61.12 | 445.3 |
-| Shadow | candidate | 3.211 | 34.71 / 98.37 | 36.96 / 102.07 | 445.4 |
+| Public | baseline | 2.425 | 18.94 / 44.08 | 21.09 / 47.11 | 445.2 |
+| Public | candidate | 2.596 | 28.41 / 81.19 | 31.17 / 86.04 | 444.4 |
+| Shadow | baseline | 2.592 | 24.10 / 53.50 | 26.38 / 56.51 | 445.4 |
+| Shadow | candidate | 2.530 | 34.60 / 81.15 | 36.45 / 83.00 | 445.5 |
 
 Peak RSS includes evaluator catalog objects plus the in-memory FTS index. The
-fixed-query retrieval-only benchmark measured 253.1 MiB baseline and 253.5 MiB
-candidate peak RSS in separate processes. The candidate creates no persisted index: generated
-asset size is 0 bytes; the verified input catalog is 60,546,327 bytes.
+fixed-query retrieval-only benchmark measured 253.0 MiB peak RSS for both
+baseline and candidate in separate processes. The candidate creates no
+persisted index: generated asset size is 0 bytes; the verified input catalog is
+60,546,327 bytes.
 
 ## Reproduction
 
