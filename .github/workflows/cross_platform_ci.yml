@@ -20,6 +20,9 @@ jobs:
       with:
         python-version: "3.12"
 
+    - name: Prepare Data
+      run: python scripts/setup_data.py
+
     - name: Run 29 tests + cross platform contract
       run: python -m unittest discover -s tests -p "test_*.py"
 
