@@ -30,11 +30,11 @@
   "evidence": {
     "results": {
       "path": "reports/experiments/TASK-303-results.json",
-      "sha256": "d3302588e9b89deb98de32e13070ce2d03825c2274bcec4e8173d74c986d7eca"
+      "sha256": "9deba2b4e633acb9c5d8ef14958a4336b01e8da46605f209d9e6fdc115030574"
     },
     "fixed_query_benchmark": {
       "path": "reports/experiments/TASK-303-benchmark.json",
-      "sha256": "9e69cb581c4d74f33cb8e489bcbc071f9fd5ee13fb48b660ca8ba3f0c6d31a30"
+      "sha256": "1edca3742444b1da6195636a2de3ab4f359d7d1a47abe62e98b7ed96732c4d9e"
     }
   },
   "reproduction": [

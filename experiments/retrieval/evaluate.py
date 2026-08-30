@@ -335,7 +335,11 @@ def main() -> None:
             "shadow_hit_rate_at_10_gte_0_895": candidate_shadow["hit_rate_at_10"] >= 0.895,
         }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(
+        json.dumps(result, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     if not args.worker:
         summary = {
             key: {
