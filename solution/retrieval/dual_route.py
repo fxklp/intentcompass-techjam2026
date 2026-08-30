@@ -19,6 +19,7 @@ BUYING_WEIGHTS = (8.0, 6.0, 5.0, 5.0, 3.0, 1.0)
 CATEGORY_WEIGHTS = (5.0, 10.0, 1.0, 2.0, 2.0, 0.5)
 USE_CASE_WEIGHTS = (4.0, 3.0, 7.0, 2.0, 1.0, 5.0)
 RRF_K = 30.0
+BROWSING_ONLY_ATTRIBUTES = {"use_case"}
 
 QUERY_EXPANSIONS: dict[str, tuple[str, ...]] = {
     "casual": ("everyday", "comfortable"),
@@ -123,11 +124,22 @@ class DualRouteInMemoryRetriever:
         constrained = tuple(
             constraint
             for constraint in request.constraints
-            if constraint.values and constraint.attribute != "other"
+            if (
+                constraint.values
+                and constraint.attribute != "other"
+                and constraint.attribute not in BROWSING_ONLY_ATTRIBUTES
+            )
         )
         if constrained:
             attributes = ",".join(sorted({item.attribute for item in constrained}))
             return "buying", ("structured_constraints_present", f"attributes:{attributes}")
+        use_cases = tuple(
+            constraint
+            for constraint in request.constraints
+            if constraint.values and constraint.attribute in BROWSING_ONLY_ATTRIBUTES
+        )
+        if use_cases:
+            return "browsing", ("use_case_without_hard_constraint",)
         if request.category:
             return "browsing", ("category_without_hard_constraint",)
         return "browsing", ("open_ended_query",)

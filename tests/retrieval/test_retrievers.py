@@ -155,6 +155,34 @@ class RetrieverTestCase(unittest.TestCase):
             first.close()
             second.close()
 
+    def test_auto_route_treats_use_case_as_browsing_until_hard_constraint(self) -> None:
+        retriever = DualRouteInMemoryRetriever(self.catalog)
+        try:
+            browsing = retriever.search(
+                RetrievalRequest(
+                    query="something for travel",
+                    limit=4,
+                    constraints=(RetrievalConstraint("use_case", ("travel",)),),
+                )
+            )
+            buying = retriever.search(
+                RetrievalRequest(
+                    query="cotton shirt for travel",
+                    limit=4,
+                    constraints=(
+                        RetrievalConstraint("use_case", ("travel",)),
+                        RetrievalConstraint("material", ("cotton",)),
+                    ),
+                )
+            )
+            self.assertEqual("browsing", browsing.trace.selected_path)
+            self.assertEqual(
+                ("use_case_without_hard_constraint",), browsing.trace.reason_codes
+            )
+            self.assertEqual("buying", buying.trace.selected_path)
+        finally:
+            retriever.close()
+
     def test_empty_limit_does_not_query_or_fallback(self) -> None:
         retriever = DualRouteInMemoryRetriever(self.catalog)
         try:
@@ -173,6 +201,31 @@ class RetrieverTestCase(unittest.TestCase):
             self.assertEqual("popularity_fallback", result.trace.routes[0])
             self.assertEqual(["A1", "A4"], [item.parent_asin for item in result.candidates])
         finally:
+            retriever.close()
+
+    def test_baseline_unmatched_query_exactly_uses_legacy_popularity_fallback(self) -> None:
+        legacy = _BaselineBM25Index(self.catalog)
+        retriever = BaselineFTS5Retriever(self.catalog)
+        try:
+            for query in ("", "zzzz-unmatched"):
+                expected = legacy.search(CoreRetrievalRequest(query=query, limit=3))
+                result = retriever.search(RetrievalRequest(query=query, limit=3))
+                self.assertTrue(result.trace.fallback_used)
+                self.assertEqual(("popularity_fallback",), result.trace.routes)
+                self.assertEqual(
+                    ("no_fts_match", "deterministic_popularity_fallback"),
+                    result.trace.reason_codes,
+                )
+                self.assertEqual(
+                    [item.parent_asin for item in expected],
+                    [item.parent_asin for item in result.candidates],
+                )
+                self.assertEqual(
+                    [item.retrieval_score for item in expected],
+                    [item.retrieval_score for item in result.candidates],
+                )
+        finally:
+            legacy.close()
             retriever.close()
 
 

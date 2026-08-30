@@ -25,6 +25,12 @@ class BaselineFTS5Retriever:
         fallback_used = not rows and limit > 0
         if fallback_used:
             rows = [(parent_asin, 0.0) for parent_asin in self.index.fallback_ids[:limit]]
+        route = "popularity_fallback" if fallback_used else "baseline_fts"
+        reasons = (
+            ("no_fts_match", "deterministic_popularity_fallback")
+            if fallback_used
+            else ("compatibility_fallback",)
+        )
         candidates = tuple(
             self._candidate(parent_asin, rank, score)
             for rank, (parent_asin, score) in enumerate(rows)
@@ -33,9 +39,9 @@ class BaselineFTS5Retriever:
             candidates=candidates,
             trace=RetrievalTrace(
                 selected_path="baseline",
-                reason_codes=("compatibility_fallback",),
-                routes=("baseline_fts",),
-                route_candidate_counts=(("baseline_fts", len(candidates)),),
+                reason_codes=reasons,
+                routes=(route,),
+                route_candidate_counts=((route, len(candidates)),),
                 query_terms=query_terms,
                 fallback_used=fallback_used,
             ),

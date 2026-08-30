@@ -142,6 +142,61 @@ def candidate_recall(samples: list[dict], audits: list[dict[str, object]]) -> di
     }
 
 
+def technical_metrics(summary: dict[str, object]) -> dict[str, float]:
+    """Apply the official formula to one overall or scenario metric summary."""
+    mttc = summary.get("mttc")
+    efficiency = (
+        0.0
+        if mttc is None
+        else max(0.0, min(1.0, (11.0 - float(mttc)) / 10.0))
+    )
+    score = (
+        0.50 * float(summary["hit_rate_at_10"])
+        + 0.30 * float(summary["mrr"])
+        + 0.20 * efficiency
+    )
+    return {
+        "efficiency": round(efficiency, 6),
+        "recommended_technical_score": round(score, 6),
+    }
+
+
+def add_scenario_technical_scores(metrics: dict[str, object]) -> None:
+    """Enrich raw evaluator JSON so scenario scores are evidence, not prose."""
+    scenario_metrics = metrics.get("scenario_metrics")
+    if not isinstance(scenario_metrics, dict):
+        raise ValueError("scenario_metrics must be an object")
+    for summary in scenario_metrics.values():
+        if not isinstance(summary, dict):
+            raise ValueError("each scenario metric must be an object")
+        summary.update(technical_metrics(summary))
+
+
+def assert_scenario_consistency(metrics: dict[str, object], tolerance: float = 2e-6) -> None:
+    """Check that scenario summaries aggregate back to the overall metrics."""
+    scenario_metrics = metrics.get("scenario_metrics")
+    if not isinstance(scenario_metrics, dict) or not scenario_metrics:
+        raise ValueError("scenario_metrics must be a non-empty object")
+    total = sum(int(summary["sample_count"]) for summary in scenario_metrics.values())
+    if total != int(metrics["sample_count"]):
+        raise ValueError(f"scenario sample count {total} != overall {metrics['sample_count']}")
+    for key in (
+        "hit_rate_at_10",
+        "mrr",
+        "mttc",
+        "efficiency",
+        "recommended_technical_score",
+    ):
+        weighted = sum(
+            int(summary["sample_count"]) * float(summary[key])
+            for summary in scenario_metrics.values()
+        ) / total
+        if abs(weighted - float(metrics[key])) > tolerance:
+            raise ValueError(
+                f"scenario-weighted {key} {weighted:.9f} != overall {metrics[key]}"
+            )
+
+
 def worker(mode: str, dataset: str, catalog_path: Path, public_path: Path) -> dict:
     public_samples = load_jsonl(public_path)
     catalog_ids, categories, products = catalog_index(catalog_path)
@@ -149,6 +204,8 @@ def worker(mode: str, dataset: str, catalog_path: Path, public_path: Path) -> di
     agent = RetrievalExperimentAgent(catalog_path, mode)
     try:
         metrics = evaluate(agent, samples, catalog_ids, categories, products)
+        add_scenario_technical_scores(metrics)
+        assert_scenario_consistency(metrics)
         metrics.pop("sessions", None)
         traces = []
         for sample, audit in zip(samples[:8], agent.session_audits[:8]):
