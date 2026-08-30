@@ -12,23 +12,21 @@ To ensure the local environment is not disrupted by line ending issues, develope
 
 **macOS / Linux:**
 ```bash
+# 1. Setup Data (Network Required)
 python3 scripts/setup_data.py
-python3 -m unittest discover -s tests -p "test_*.py"
-```
-**Windows (PowerShell):**
-```bash
-python scripts\setup_data.py
-python -m unittest discover -s tests -p "test_*.py"
-```
-### Step 3: Local Verification and Push to Cloud
-Run the following commands in the terminal sequentially for final complete verification and push (since the temporary repository test was added, 32 or 33 tests should pass successfully):
 
-```bash
+# 2. Evaluation and Gates (Offline)
 python3 -m unittest discover -s tests -p "test_*.py"
 python3 demo/run_demo.py
 python3 scripts/team_gate.py --full-eval
-git add tests/test_cross_platform_contract.py docs/team/CROSS_PLATFORM.md
-git commit -m "test: strengthen cross-platform contract with temp repo & repro docs"
-git push
-git rev-parse HEAD
+```
+**Windows (PowerShell):**
+```bash
+# 1. Setup Data (Network Required)
+python scripts\setup_data.py
+
+# 2. Evaluation and Gates (Offline)
+python -m unittest discover -s tests -p "test_*.py"
+python demo\run_demo.py
+python scripts\team_gate.py --full-eval
 ```
