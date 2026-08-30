@@ -41,7 +41,10 @@ class RetrievalBenchmarkTest(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(0, completed.returncode, completed.stderr)
-            result = json.loads(output.read_text(encoding="utf-8"))
+            raw_output = output.read_bytes()
+            self.assertTrue(raw_output.endswith(b"\n"))
+            self.assertNotIn(b"\r\n", raw_output)
+            result = json.loads(raw_output.decode("utf-8"))
             baseline_pid = result["baseline"]["process_id"]
             candidate_pid = result["candidate"]["process_id"]
             self.assertNotEqual(os.getpid(), baseline_pid)

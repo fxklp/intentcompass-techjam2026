@@ -119,7 +119,9 @@ python scripts/team_gate.py
 
 Raw evidence is in `TASK-303-results.json`; fixed-query evidence is in
 `TASK-303-benchmark.json`. The manifest records hashes, catalog provenance, and
-the tested code commit.
+the tested code commit. Evidence hashes are SHA-256 digests of the raw bytes of
+the UTF-8, LF-terminated files; they are not hashes of normalized text or parsed
+JSON.
 
 ## Known limitations
 

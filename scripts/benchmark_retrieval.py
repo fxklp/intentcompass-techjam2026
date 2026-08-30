@@ -131,7 +131,7 @@ def main() -> None:
     payload = json.dumps(result, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8")
+        args.output.write_text(payload, encoding="utf-8", newline="\n")
     if not args.worker:
         print(payload, end="")
 
