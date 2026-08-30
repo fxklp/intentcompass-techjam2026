@@ -1,0 +1,16 @@
+# 统一默认文本文件使用 LF
+* text=auto eol=lf
+
+# 明确声明常用文本文件为 LF
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# 明确声明二进制文件，防止 Git 破坏其内容
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
