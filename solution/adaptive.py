@@ -67,6 +67,12 @@ class AdaptiveController:
         if terminal_mode != "off" and self.category_order is not None:
             from solution.terminal_recovery import TerminalRecovery
             self.terminal = TerminalRecovery(self.retriever.index, terminal_mode)
+        from solution.precision_order import DEFAULT, VARIANTS, PrecisionOrder
+        precision_mode = os.environ.get("INTENTCOMPASS_PRECISION_ORDER", DEFAULT)
+        if precision_mode not in VARIANTS:
+            raise ValueError("invalid precision ordering mode")
+        self.precision = (PrecisionOrder(self.retriever.index, precision_mode)
+                          if precision_mode != "off" and self.category_order is not None else None)
 
     def reset(self, session_id: str, profile: dict) -> None:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
@@ -74,6 +80,8 @@ class AdaptiveController:
             self.terminal.reset(session_id)
 
     def close(self) -> None:
+        if self.precision is not None:
+            self.precision.close()
         if self.terminal:
             self.terminal.close()
         if self.field_evidence is not None:
@@ -117,11 +125,15 @@ class AdaptiveController:
             )
         if self.category_order is not None:
             ranked = self.category_order.reorder(ranked, state.category, fallback=result.trace.fallback_used)
+        if self.precision is not None:
+            ranked = self.precision.reorder(ranked, state, fallback=result.trace.fallback_used)
         if self.terminal:
             if request.limit > 50:
                 head = candidates[:output_limit] if result.trace.fallback_used else rank_candidates(
                     candidates[:50], state, output_limit, policy="constraints")
                 head = self.category_order.reorder(head, state.category, fallback=result.trace.fallback_used)
+                if self.precision is not None:
+                    head = self.precision.reorder(head, state, fallback=result.trace.fallback_used)
                 ids = {c.parent_asin for c in head}
                 ranked = [*head, *(c for c in ranked if c.parent_asin not in ids)]
             ranked = self.terminal.reorder(candidates, state, ranked, message, output_limit, fallback=result.trace.fallback_used)
