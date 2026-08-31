@@ -60,7 +60,7 @@ class AdaptiveController:
                 and self.offline_ranking == "constraints" and not self.semantic.enabled):
             from solution.category_order import CategoryHeadOrder
             self.category_order = CategoryHeadOrder(self.retriever.index)
-        terminal_mode = os.environ.get("INTENTCOMPASS_TERMINAL_RECOVERY", "off")
+        terminal_mode = os.environ.get("INTENTCOMPASS_TERMINAL_RECOVERY", "lastchance")
         if terminal_mode not in {"off", "terminal", "lastchance"}:
             raise ValueError("invalid terminal recovery mode")
         self.terminal = None

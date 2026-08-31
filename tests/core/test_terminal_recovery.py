@@ -90,16 +90,28 @@ class TerminalRecoveryTests(unittest.TestCase):
     def test_agent_reset_and_empty_outputs(self):
         from starter.agent import Agent
         clean = {k: v for k, v in os.environ.items() if not k.startswith("INTENTCOMPASS_")}
-        clean["INTENTCOMPASS_TERMINAL_RECOVERY"] = "lastchance"
         with patch.dict(os.environ, clean, clear=True):
             agent = Agent(self.path)
             try:
+                self.assertEqual(agent._core._adaptive.terminal.mode, "lastchance")
                 agent.reset("manual", {})
                 first = agent.respond("manual", "I'm looking for shoes. What I need is: leather.", 1, 10)
                 self.assertEqual(agent.respond("manual", "hello", 2, 0)["recommendations"], [])
                 self.assertEqual(agent._core._adaptive.terminal.sessions["manual"].shown, ())
                 agent.reset("manual", {})
                 self.assertEqual(first, agent.respond("manual", "I'm looking for shoes. What I need is: leather.", 1, 10))
+            finally:
+                agent.close()
+
+    def test_invalid_configuration_rejected_and_explicit_off(self):
+        from starter.agent import Agent
+        with patch.dict(os.environ, {"INTENTCOMPASS_TERMINAL_RECOVERY": "unknown"}):
+            with self.assertRaises(ValueError):
+                Agent(self.path)
+        with patch.dict(os.environ, {"INTENTCOMPASS_TERMINAL_RECOVERY": "off"}):
+            agent = Agent(self.path)
+            try:
+                self.assertIsNone(agent._core._adaptive.terminal)
             finally:
                 agent.close()
 
