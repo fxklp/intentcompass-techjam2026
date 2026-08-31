@@ -141,6 +141,9 @@ class SessionState:
         if self.last_asked_attribute == "category":
             self.category = text
             return
+        if self.last_asked_attribute == "budget" and re.fullmatch(r"\d+(?:\.\d+)?", text):
+            self._replace_or_group(("around $" + text,), turn, "budget")
+            return
         if self.last_asked_attribute:
             self._replace_or_group(_preference_values(text), turn, self.last_asked_attribute)
         elif re.search(r"\b(?:prefer|need|want|must|under)\b", text, re.I):

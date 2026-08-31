@@ -89,6 +89,11 @@ def validated_order(response: dict, candidates: list[Candidate]) -> list[Candida
     if len(texts) != 1 or not isinstance(texts[0], str):
         raise ValueError("missing structured ranking")
     parsed = json.loads(texts[0])
+    return validate_id_order(parsed, candidates)
+
+
+def validate_id_order(parsed: object, candidates: list[Candidate]) -> list[Candidate]:
+    """Common strict boundary for any model provider's structured output."""
     if not isinstance(parsed, dict) or set(parsed) != {"ordered_ids"}:
         raise ValueError("unexpected ranking object")
     ids = parsed["ordered_ids"]

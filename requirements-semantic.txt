@@ -1,0 +1,4 @@
+# Optional CPU semantics only. Baseline requires no third-party dependencies.
+numpy==2.2.6
+onnxruntime==1.29.0
+tokenizers==0.23.1

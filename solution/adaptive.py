@@ -3,8 +3,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import os
 
-from solution.clarification import choose_adaptive_question
+from solution.clarification import Clarification, choose_adaptive_question
+from solution.question_policy import choose_question
 from solution.config import CoreConfig
 from solution.context import ContextMemory
 from solution.contracts import AgentResponse, Candidate
@@ -12,7 +14,8 @@ from solution.ranker import rank_candidates
 from solution.retrieval import BaselineFTS5Retriever, DualRouteInMemoryRetriever
 from solution.retrieval.contracts import RetrievalConstraint, RetrievalRequest
 from solution.state import SessionState
-from solution.semantic import MAX_CANDIDATES, SemanticReranker
+from solution.semantic import MAX_CANDIDATES
+from solution.chat_reranker import make_reranker
 from solution.workflow import WorkflowState
 
 
@@ -26,10 +29,19 @@ class AdaptiveSession:
 class AdaptiveController:
     def __init__(self, catalog_path: Path, config: CoreConfig) -> None:
         backend = DualRouteInMemoryRetriever if config.retrieval == "dual_route" else BaselineFTS5Retriever
-        self.retriever = backend(catalog_path)
+        assets = Path(os.environ.get("INTENTCOMPASS_SEMANTIC_ASSETS", str(Path(__file__).resolve().parents[1] / "artifacts/semantic")))
+        if config.retrieval == "hybrid":
+            from solution.retrieval.hybrid import HybridRetriever
+            self.retriever = HybridRetriever(catalog_path, assets)
+        else:
+            self.retriever = backend(catalog_path)
+        self.mode = config.mode
         self.backend_name = config.retrieval
         self.sessions: dict[str, AdaptiveSession] = {}
-        self.semantic = SemanticReranker()
+        self.semantic = make_reranker()
+        if os.environ.get("INTENTCOMPASS_SEMANTIC") == "local":
+            from solution.local_reranker import LocalReranker
+            self.semantic = LocalReranker(assets)
 
     def reset(self, session_id: str, profile: dict) -> None:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
@@ -45,11 +57,11 @@ class AdaptiveController:
         plan = session.workflow.plan(state, message, changed=changed)
         output_limit = max(0, min(10, int(top_k)))
         query = state.retrieval_query(turn)
-        if plan.recovery and state.category:
+        if self.mode != "integrated" and plan.recovery and state.category:
             query = state.category
         request = RetrievalRequest(
             query=query,
-            limit=plan.pool_limit,
+            limit=50 if self.mode == "integrated" else plan.pool_limit,
             route_hint=plan.route,
             category=state.category,
             constraints=tuple(RetrievalConstraint(key, slot.values) for key, slot in state.preferences.items()),
@@ -61,25 +73,32 @@ class AdaptiveController:
         # metadata from a no-match pool as query relevance or profile evidence.
         ranking_limit = max(output_limit, MAX_CANDIDATES) if self.semantic.enabled else output_limit
         ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
-            candidates, state, ranking_limit, profile_priors=session.memory.active_priors(),
+            candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
         )
         context = session.memory.distill(state)
         semantic_result = None
-        if not result.trace.fallback_used and output_limit > 0:
+        cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
+        if not result.trace.fallback_used and output_limit > 0 and not cutoff:
             semantic_result = self.semantic.rerank(ranked, context)
             ranked = semantic_result.candidates
         ranked = ranked[:output_limit]
-        question = choose_adaptive_question(state, candidates, output_limit=output_limit, fallback_used=result.trace.fallback_used)
+        if self.mode == "integrated":
+            attribute, question_message = choose_question(state)
+            if turn >= 10:
+                attribute, question_message = None, "Here are the closest matches for your current preferences."
+            question = Clarification(attribute, question_message, "stable_priority_under_overload", len(candidates) > max(10, output_limit*2))
+        else:
+            question = choose_adaptive_question(state, candidates, output_limit=output_limit, fallback_used=result.trace.fallback_used)
         state.mark_asked(question.attribute)
         session.workflow.overloaded = question.overloaded
         session.workflow.last_fallback = result.trace.fallback_used
         session.last_trace = {
-            "mode": "adaptive",
+            "mode": self.mode,
             "backend": self.backend_name,
             "intent_route": plan.route,
             "workflow": plan.reason,
             "query": query,
-            "pool_limit": plan.pool_limit,
+            "pool_limit": request.limit,
             "candidate_count": len(candidates),
             "retrieval": result.trace.to_dict(),
             "question": {
