@@ -60,11 +60,22 @@ class AdaptiveController:
                 and self.offline_ranking == "constraints" and not self.semantic.enabled):
             from solution.category_order import CategoryHeadOrder
             self.category_order = CategoryHeadOrder(self.retriever.index)
+        terminal_mode = os.environ.get("INTENTCOMPASS_TERMINAL_RECOVERY", "off")
+        if terminal_mode not in {"off", "terminal", "lastchance"}:
+            raise ValueError("invalid terminal recovery mode")
+        self.terminal = None
+        if terminal_mode != "off" and self.category_order is not None:
+            from solution.terminal_recovery import TerminalRecovery
+            self.terminal = TerminalRecovery(self.retriever.index, terminal_mode)
 
     def reset(self, session_id: str, profile: dict) -> None:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
+        if self.terminal:
+            self.terminal.reset(session_id)
 
     def close(self) -> None:
+        if self.terminal:
+            self.terminal.close()
         if self.field_evidence is not None:
             self.field_evidence.close()
         self.retriever.close()
@@ -81,7 +92,7 @@ class AdaptiveController:
             query = state.category
         request = RetrievalRequest(
             query=query,
-            limit=50 if self.mode == "integrated" else plan.pool_limit,
+            limit=self.terminal.pool_limit(state, message, output_limit) if self.terminal else (50 if self.mode == "integrated" else plan.pool_limit),
             route_hint=plan.route,
             category=state.category,
             constraints=tuple(RetrievalConstraint(key, slot.values) for key, slot in state.preferences.items()),
@@ -92,6 +103,8 @@ class AdaptiveController:
         # Popularity fallback is a compatibility promise: do not reinterpret
         # metadata from a no-match pool as query relevance or profile evidence.
         ranking_limit = max(output_limit, getattr(self.semantic, "candidate_limit", MAX_CANDIDATES)) if self.semantic.enabled else output_limit
+        if self.terminal and request.limit > 50:
+            ranking_limit = len(candidates)
         if self.offline_ranking == "field_dominance" and not result.trace.fallback_used:
             from solution.field_evidence import refine_by_dominance
             ranked = rank_candidates(candidates, state, ranking_limit, policy="constraints")
@@ -104,6 +117,14 @@ class AdaptiveController:
             )
         if self.category_order is not None:
             ranked = self.category_order.reorder(ranked, state.category, fallback=result.trace.fallback_used)
+        if self.terminal:
+            if request.limit > 50:
+                head = candidates[:output_limit] if result.trace.fallback_used else rank_candidates(
+                    candidates[:50], state, output_limit, policy="constraints")
+                head = self.category_order.reorder(head, state.category, fallback=result.trace.fallback_used)
+                ids = {c.parent_asin for c in head}
+                ranked = [*head, *(c for c in ranked if c.parent_asin not in ids)]
+            ranked = self.terminal.reorder(candidates, state, ranked, message, output_limit, fallback=result.trace.fallback_used)
         context = session.memory.distill(state)
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
