@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import argparse
 import hashlib
 import statistics
 import subprocess
@@ -34,6 +35,9 @@ def verify_runtime(report: dict, revision: str | None = None) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--prefix", choices=("task004-postapi", "task004-controlled"), default="task004-postapi")
+    prefix = parser.parse_args().prefix
     directory = ROOT / "reports/generated"
     evidence = {}
     screens = []
@@ -68,17 +72,19 @@ def main() -> None:
     reports = {}
     for mode in ("baseline", "integrated"):
         for number in range(1, 4):
-            name = f"task004-postapi-{mode}-{number}.json"
+            name = f"{prefix}-{mode}-{number}.json"
             path = directory / name
             reports[name] = json.loads(path.read_text(encoding="utf-8"))
             evidence[name] = sha256(path)
             if reports[name]["working_tree_dirty"]:
                 raise ValueError("release evidence must use a clean checkout")
+            if prefix == "task004-controlled" and reports[name].get("cpu_affinity_mask") != 1:
+                raise ValueError("controlled Windows runs must share preregistered CPU mask 1")
             if mode == "integrated":
                 verify_runtime(reports[name])
     regressions = []
     for number in range(1, 4):
-        regressions.extend(non_regression(reports[f"task004-postapi-baseline-{number}.json"]["metrics"], reports[f"task004-postapi-integrated-{number}.json"]["metrics"]))
+        regressions.extend(non_regression(reports[f"{prefix}-baseline-{number}.json"]["metrics"], reports[f"{prefix}-integrated-{number}.json"]["metrics"]))
     path = directory / "task004-postapi-shadow.json"
     shadow = json.loads(path.read_text(encoding="utf-8"))
     verify_runtime(shadow)
@@ -93,7 +99,7 @@ def main() -> None:
 
     timing = {}
     for mode in ("baseline", "integrated"):
-        group = [reports[f"task004-postapi-{mode}-{n}.json"] for n in range(1,4)]
+        group = [reports[f"{prefix}-{mode}-{n}.json"] for n in range(1,4)]
         timing[mode] = {key: statistics.median(item["timing"]["respond_latency_ms"][key] for item in group) for key in ("mean", "p50", "p95", "p99")}
         timing[mode]["peak_memory_bytes"] = statistics.median(item["peak_memory_bytes"] for item in group)
         timing[mode]["initialization_seconds"] = statistics.median(item["timing"]["agent_initialization_seconds"] for item in group)
@@ -105,15 +111,16 @@ def main() -> None:
     result = {
         "status": "local_freeze_eligible_for_independent_reproduction" if not regressions else "recheck_failed",
         "decision": "retain integrated lexical default; no live model promoted",
-        "runtime_commit": reports["task004-postapi-integrated-1.json"]["commit"],
+        "runtime_commit": reports[f"{prefix}-integrated-1.json"]["commit"],
         "bounded_model_screen_complete": True,
         "live_screen_runtime_commit": API_RUN_COMMIT,
-        "public": reports["task004-postapi-integrated-1.json"]["metrics"],
+        "public": reports[f"{prefix}-integrated-1.json"]["metrics"],
         "shadow": shadow["metrics"], "regressions": regressions,
         "timing_medians": timing, "live_screens": screens,
         "api_budget": BudgetLedger(ROOT / "artifacts/api-budget/task004.sqlite3").summary(),
         "evidence_sha256": evidence,
         "limits": [
+            "Unpinned post-API p95 gate failed; controlled CPU evidence does not erase that result",
             "Twelve public sessions screen candidates; not full-public or private API accuracy",
             "No qualifying API candidate was expanded to full Public or Shadow",
             "Unknown failed calls retain budget reservations; estimates are not invoices",
@@ -122,7 +129,7 @@ def main() -> None:
             "Liu/Cheng independent reproduction remains pending; no Wang task",
         ],
     }
-    output = directory / "task004-postapi-summary.json"
+    output = directory / f"{prefix}-summary.json"
     write_json(output, result)
     print(json.dumps({key: result[key] for key in ("status", "runtime_commit", "decision", "regressions", "timing_medians", "api_budget")}, indent=2))
     print("summary_sha256=" + sha256(output))
