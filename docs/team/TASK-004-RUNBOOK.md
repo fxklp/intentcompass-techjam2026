@@ -1,6 +1,7 @@
 # TASK-004 local integration runbook
 
-Status: implementation and experiments in progress; not a submission approval.
+Status: offline stage frozen and verified; API comparison blocked on credentials.
+This is NOT a complete-project or submission approval.
 Main stays at its reviewed baseline. Wang receives no work. No PR self-approval.
 
 ## Fixed boundaries
@@ -182,6 +183,68 @@ repeated immutable category strings, with no score/query/ID/order changes.
 Re-run independent measurements and all tests; reject if any quality regresses.
 The local candidate branch may default to integrated lexical mode after these
 checks, while main remains unchanged and not independently approved.
+
+## Offline freeze result
+
+Runtime SHA: `7480858b61aeee0abb81d3aa7bf5ac6c93659b07`.
+Later runbook/summary-tool commits do not change the measured runtime.
+
+- Default is now `integrated` + baseline retrieval + semantic OFF. It runs
+  with standard Python, no model download, credentials or network.
+- Public: HR .910, MRR .624024, MTTC 4.255, TechnicalScore .777107.
+- Shadow: HR .895, MRR .630488, MTTC 3.805, TechnicalScore .780546.
+- Overall and EVERY scenario HR/MRR/MTTC match baseline; three Public repeat
+  runs and one paired Shadow check. No Shadow-based retuning.
+- Median of three alternating fresh-process measurements: mean 37.681275 ->
+  22.747025 ms (-39.63%); p95 77.2355 -> 70.8262 ms (-8.30%).
+- Peak RSS median 443,387,904 -> 453,722,112 bytes (+9.86 MiB, within the
+  predeclared 16 MiB review allowance). Cold initialization 2.913285 -> 3.172592
+  seconds (+0.259307s). Do NOT claim every resource measurement improved.
+- Full semantic-environment tests 106/106 passed; full gate passed.
+- Standard Python without ONNX Runtime: 106 tests, 105 passed and the optional
+  real-model smoke skipped, no failures. This verifies credential-free fallback.
+- Default demo: OFFICIAL HIT after override, first hit turn 5, rank 8; original
+  demo assertions were preserved, not weakened.
+- Current shared API ledger: zero calls, zero cost. Qwen/DeepSeek transport and
+  budget failure paths are mocked-test verified, NOT real API quality evidence.
+- No runtime/data/evaluator/contract defect was found in the completed checks;
+  this is not a proof of absence of all bugs. New macOS/Linux reproduction is
+  still pending. No remote push, PR creation, merge, or teammate assignment.
+
+The small storage-only cautious change reduced the excess memory without
+quality loss. Update the provisional feasibility assessment from 12/15 to
+14/15, leaving the other provisional scores unchanged: 66/90 assessed points.
+This remains an OFFLINE-stage subjective simulation, not the final judgment
+requested after live-model optimization. LLM validation is still incomplete.
+
+Verify the final evidence and generate its machine-readable summary:
+
+```text
+python -m tests.core.summarize_final
+```
+
+The summary verifies all recorded candidate runtime and frozen-data hashes
+against current files, checks scenario non-regression and declared resource
+limits, and includes the evidence checksums and shared API budget status.
+
+### Next dependency (team lead only)
+
+Configure Qwen/DeepSeek credentials locally or provide the path of an existing
+configuration file; confirm Qwen region and account credits. Never paste keys
+into chat. Continue from this branch and the SAME budget ledger. No need for
+Wang to participate. Do not tell Liu/Cheng to review unfinished API experiments.
+
+After that stage is genuinely frozen, simple independent reproduction will be:
+
+```text
+python -m unittest discover -s tests -p "test_*.py"
+python scripts/team_gate.py --full-eval
+python demo/run_demo.py
+```
+
+No large model installation is needed for this default-mode check. Send only
+the final shared branch/SHA and commands through the team lead, not teammate
+to teammate. These are a prepared handoff, not a task dispatched now.
 
 Final freeze decision, judge simulation and simple Liu/Cheng reproduction
 commands will be added only after the corresponding checks actually finish.
