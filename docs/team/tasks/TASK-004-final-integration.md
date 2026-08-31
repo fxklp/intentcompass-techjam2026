@@ -114,3 +114,50 @@ attributes from two to one; the window, evidence text, cache and call cap stay
 fixed. Test Max and, if necessary, the cheaper Flash once each (<=2 RMB/run).
 No further prompt/threshold searching after these comparisons. All existing
 quality gates, full-set validation and budget requirements remain unchanged.
+
+## Authorized continuation: TASK-006 offline constraint/field ranking
+
+The lead requested execution of the offline diagnosis and improvement proposal.
+Base: `2181f9952763a01d4b6d99b1a4166a5218c77401`; no API calls or new dependencies.
+Additional allowed report: `docs/team/TASK-006-OFFLINE.md`. Existing solution/
+and tests/core/ permissions apply; no teammate branch is changed or tasked.
+
+Predeclare before candidate results:
+
+1. Reproduce baseline and diagnose all Public 200 sessions outside the Agent.
+   Inspect aggregate missing-recall, below-Top10 ranking, late conversion and
+   visible-constraint coverage. No target identities/text in diagnostic output.
+2. First fix the narrowly demonstrated negative-preference / upper-budget
+   semantics as an isolated candidate. Keep ordinary affirmative and target-
+   budget behavior byte-equivalent where feasible. Unknown metadata is not a
+   contradiction. Treat zero metric change as robustness-only, not score gain.
+3. Field-aware reranking is a separate ablation. Use original frozen catalog
+   fields via the existing in-memory index, no second index/catalog copy.
+   Prefer explicit field evidence over weak keyword overlap. No grid search,
+   no ASIN/session rules, no enlarging candidate pools or editing questions
+   simultaneously. At most three predetermined scoring policies after diagnosis.
+4. Only Public overall/scenario non-regressing candidates receive frozen
+   Shadow aggregate testing. Existing Shadow is previously used, not private.
+   Freeze one new synthetic evaluation seed before any new holdout results;
+   use it once for final validation only, never for tuning or inspecting labels:
+   `intentcompass-task006-confirmation-20260831` (200 non-public targets).
+5. Promotion: Public, Shadow and new confirmation overall/scenario HR/MRR
+   non-decreasing, MTTC non-increasing (1e-6 rounding tolerance). Require a
+   real quality gain for score-improvement claims; separately label semantic
+   correctness fixes with unchanged benchmark metrics.
+6. Speed: three alternating isolated baseline/candidate runs, median p95
+   within +5% and memory within +16 MiB; keep cold start separate. No API
+   latency relaxation is applied to this offline stage. Preserve raw failures.
+7. Stop any quality-regressing direction rather than tune to Shadow. Keep
+   baseline if no reliable score gain. All unit/gate/demo checks and exact
+   diff/source/data audits are required before a local handoff; no push/merge.
+
+After baseline diagnosis, freeze these field policies before their results:
+F1 `field_bonus`: baseline score plus 3 times fraction of explicit phrases
+found in title/features/details (budget excluded). F2 `field_groups`: number
+of fully evidenced explicit attribute groups first, baseline score second.
+F3 `field_top10`: F2 within the baseline Top10 only, preserving membership and
+all subsequent candidate order. No tuning of weights or limits after results.
+Use a rowid directory and bounded 256-product field cache over the EXISTING
+SQLite FTS table, not another catalog/index; clear it on close. Added RAM is
+expected to be a few MiB and must pass the declared measured allowance.

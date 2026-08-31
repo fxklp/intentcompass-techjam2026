@@ -39,6 +39,11 @@ class AdaptiveController:
             self.retriever = backend(catalog_path)
         self.mode = config.mode
         self.backend_name = config.retrieval
+        self.offline_ranking = os.environ.get("INTENTCOMPASS_OFFLINE_RANKING", "baseline")
+        self.field_evidence = None
+        if self.offline_ranking.startswith("field_"):
+            from solution.field_evidence import FieldEvidence
+            self.field_evidence = FieldEvidence(self.retriever.index.connection)
         self.sessions: dict[str, AdaptiveSession] = {}
         self.semantic = make_reranker()
         if os.environ.get("INTENTCOMPASS_SEMANTIC") == "local":
@@ -49,6 +54,8 @@ class AdaptiveController:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
 
     def close(self) -> None:
+        if self.field_evidence is not None:
+            self.field_evidence.close()
         self.retriever.close()
         self.sessions.clear()
 
@@ -76,6 +83,8 @@ class AdaptiveController:
         ranking_limit = max(output_limit, getattr(self.semantic, "candidate_limit", MAX_CANDIDATES)) if self.semantic.enabled else output_limit
         ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
             candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
+            primary_fields=self.field_evidence.get([c.parent_asin for c in candidates]) if self.field_evidence else None,
+            policy=self.offline_ranking,
         )
         context = session.memory.distill(state)
         semantic_result = None
