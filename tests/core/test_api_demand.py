@@ -22,6 +22,7 @@ CONTEXT = {"category": "shoes", "explicit": {"color": ["red"], "material": ["lea
 class DemandPolicyTest(unittest.TestCase):
     def model(self):
         model = Mock()
+        model.minimum_attributes = 2
         model.rerank.side_effect = lambda pool, ctx: SemanticResult(list(reversed(pool)), "model_ranked", {"prompt_tokens": 20, "completion_tokens": 5}, True)
         return model
 
@@ -56,12 +57,20 @@ class DemandPolicyTest(unittest.TestCase):
 
     def test_failure_not_cached_and_attempt_limit_counts_failures(self):
         model = Mock()
+        model.minimum_attributes = 2
         model.rerank.return_value = SemanticResult(POOL, "model_failed_offline_fallback", None, True)
         state = DemandState()
         for _ in range(4):
             self.assertEqual(state.rerank(model, POOL, CONTEXT).candidates, POOL)
         self.assertIsNone(state.key)
         self.assertEqual(model.rerank.call_count, 3)
+
+    def test_single_detailed_requirement_is_sufficient_for_early_policy(self):
+        model = self.model()
+        model.minimum_attributes = 1
+        context = {"explicit":{"feature":["comfortable waterproof everyday shoes"]}}
+        self.assertEqual(DemandState().rerank(model,POOL,context).reason,"model_ranked")
+        self.assertFalse(DemandState().rerank(model,POOL,{"category":"shoes"}).attempted)
 
     def test_compact_evidence_retains_late_constraint_and_bounds_text(self):
         text = "Catalog title " + "filler "*100 + "red leather" + " suffix"*100

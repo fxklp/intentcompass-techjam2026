@@ -172,7 +172,7 @@ def main():
     output.parent.mkdir(parents=True, exist_ok=True)
     report = {"variant": args.variant, "model": args.model, "split": args.split, "per_scenario": args.per_scenario,
               "network_enabled": args.live, "python": platform.python_version(), "platform": platform.platform(),
-              "configuration": {"candidates": DEMAND_VARIANTS[args.variant][0], "evidence_chars": DEMAND_VARIANTS[args.variant][1], "minimum_explicit_attributes": 2, "session_attempt_limit": 3, "output_format": "indices", "region": environment["INTENTCOMPASS_QWEN_REGION"]},
+              "configuration": {"candidates": DEMAND_VARIANTS[args.variant][0], "evidence_chars": DEMAND_VARIANTS[args.variant][1], "minimum_explicit_attributes": DEMAND_VARIANTS[args.variant][2], "session_attempt_limit": 3, "output_format": "indices", "region": environment["INTENTCOMPASS_QWEN_REGION"]},
               "baseline": baseline, "candidate": candidate, "quality": quality,
               "gates": {"effective_live_run": effective, "latency": latency_ok, "memory": memory_ok,
                         "same_samples": baseline["selection_sha256"] == candidate["selection_sha256"]},

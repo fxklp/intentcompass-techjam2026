@@ -9,7 +9,7 @@ from solution.contracts import Candidate
 from solution.semantic import SemanticResult, safe_context
 
 
-DEMAND_VARIANTS = {"demand20": (20, 480), "demand40": (40, 320)}
+DEMAND_VARIANTS = {"demand20": (20, 480, 2), "demand40": (40, 320, 2), "demand20early": (20, 480, 1)}
 
 
 def evidence_text(text: str, context: dict, limit: int) -> str:
@@ -42,7 +42,7 @@ class DemandState:
         zero = {"prompt_tokens": 0, "completion_tokens": 0}
         safe = safe_context(context)
         supplied = sum(bool(values) for key, values in safe["explicit"].items() if key != "category")
-        if supplied < 2:
+        if supplied < getattr(model, "minimum_attributes", 2):
             return SemanticResult(candidates, "demand_insufficient_information", zero)
         # Full context and candidate bytes, including order, affect the key.
         # No answer labels, session IDs, global response cache or persisted memo.

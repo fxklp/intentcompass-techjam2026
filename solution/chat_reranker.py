@@ -108,7 +108,7 @@ class BudgetedChatReranker:
         from solution.api_demand import DEMAND_VARIANTS
         if self.demand_variant not in {"legacy", *DEMAND_VARIANTS}:
             raise ValueError("unknown API demand policy")
-        self.candidate_limit, self.text_limit = DEMAND_VARIANTS.get(self.demand_variant, (MAX_CANDIDATES, None))
+        self.candidate_limit, self.text_limit, self.minimum_attributes = DEMAND_VARIANTS.get(self.demand_variant, (MAX_CANDIDATES, None, 2))
 
     def rerank(self, candidates: list[Candidate], context: dict) -> SemanticResult:
         zero = {"prompt_tokens": 0, "completion_tokens": 0}

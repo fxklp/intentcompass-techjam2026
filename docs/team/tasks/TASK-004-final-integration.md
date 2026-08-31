@@ -100,3 +100,17 @@ Protocol frozen before TASK-005 live results:
   provider/global ceilings, no recharge, retries, or replacement ledger.
 - Any full-quality regression stops promotion; retain measured tradeoffs and
   the offline default. Do not claim a theoretical optimum or official score.
+
+### Bounded follow-up after the two initial screens
+
+Both initial screens completed without provider failures. demand20 has zero
+quality change; demand40 improves MTTC but reduces MRR, so stop the wider-pool
+direction. No parameters or historical results from either screen are changed.
+Code inspection exposes a coarse gate: a single explicit feature can already
+contain a detailed shopping requirement. Counting two attribute categories
+unnecessarily suppresses such turns (52/75 narrow-screen responses skipped).
+One final target-blind variant, demand20early, changes ONLY minimum explicit
+attributes from two to one; the window, evidence text, cache and call cap stay
+fixed. Test Max and, if necessary, the cheaper Flash once each (<=2 RMB/run).
+No further prompt/threshold searching after these comparisons. All existing
+quality gates, full-set validation and budget requirements remain unchanged.
