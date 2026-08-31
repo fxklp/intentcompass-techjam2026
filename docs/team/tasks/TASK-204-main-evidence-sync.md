@@ -2,8 +2,8 @@
 
 Owner: Cheng Xianyun
 
-Status: local documentation update prepared from accepted main. Await user
-approval before push and PR creation.
+Status: PR #10 submitted, pending documentation fix and independent review,
+not merged.
 
 ## Baseline and branch
 
@@ -126,7 +126,7 @@ capability, current-performance, private-result, or completed-media claim.
 
 ## Upload gate
 
-Create a local commit and report it to the user. Do not push or open a PR until
-the user explicitly approves the local result. After approval, push only this
-new branch and open one PR without assigning a reviewer, contacting Liu or
-Wang, or merging. Wait for independent review and CI.
+Upload completed. PR #10 has been created on branch
+`submission/TASK-204-main-evidence-sync`. Pending documentation fix and
+independent review. Do not create a second PR, force-push, assign a reviewer,
+contact Liu or Wang, or merge.
