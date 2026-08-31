@@ -1,6 +1,11 @@
 # TASK-004 local integration runbook
 
-Status: offline stage frozen and verified; API comparison blocked on credentials.
+Current continuation: see `TASK-004-LIVE-API.md` for completed live screens,
+account limits, conditional performance evidence and local handoff. The sections
+below preserve the earlier offline-stage record, including its then-pending items.
+Current evidence command: `python -m tests.core.summarize_live --prefix task004-controlled`.
+
+Historical status: offline stage frozen and verified; API comparison blocked on credentials.
 This is NOT a complete-project or submission approval.
 Main stays at its reviewed baseline. Wang receives no work. No PR self-approval.
 
