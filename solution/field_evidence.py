@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections import OrderedDict
+from solution.constraint_semantics import excluded_term
 
 
 class FieldEvidence:
@@ -31,3 +32,21 @@ class FieldEvidence:
     def close(self):
         self.cache.clear()
         self.rowids.clear()
+
+
+def refine_by_dominance(candidates, state, fields):
+    """Only move a strict evidence superset across an adjacent subset."""
+    values = [v.casefold() for key, slot in state.preferences.items() if key != "budget"
+              for v in slot.values if v and not excluded_term(v)]
+    if not values:
+        return candidates[:]
+    head = candidates[:10]
+    evidence = {c.parent_asin: frozenset(i for i,v in enumerate(values) if v in fields.get(c.parent_asin,"")) for c in head}
+    # Stable insertion; incomparable evidence is never crossed, no arbitrary
+    # scalar weights or profile priors can override a known explicit match.
+    for i in range(1,len(head)):
+        j=i
+        while j>0 and evidence[head[j].parent_asin] > evidence[head[j-1].parent_asin]:
+            head[j-1],head[j]=head[j],head[j-1]
+            j-=1
+    return [*head,*candidates[10:]]

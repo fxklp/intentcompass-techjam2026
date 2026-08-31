@@ -161,3 +161,33 @@ all subsequent candidate order. No tuning of weights or limits after results.
 Use a rowid directory and bounded 256-product field cache over the EXISTING
 SQLite FTS table, not another catalog/index; clear it on close. Added RAM is
 expected to be a few MiB and must pass the declared measured allowance.
+
+### Bounded structural follow-up (Public only, before holdout)
+
+F1/F2 regress quality; F3 improves overall MRR but Buying MRR declines by
+0.000049 and latency rises. All three remain rejected, thresholds unchanged.
+Whole-attribute counts can trade away partially satisfied constraints. One
+additional non-parametric policy, F4 `field_dominance`, instead permits only
+adjacent Top10 swaps where the later product's primary-field evidence is a
+strict superset of the earlier product's evidence for EVERY explicit phrase.
+Incomparable/equal evidence preserves baseline order. This is not a scenario
+switch or tuned weight; no labels enter it. Fetch fields for Top10 only, since
+the rest cannot move. Verify constructive dominance/non-dominance tests first.
+If F4 fails any quality gate, stop field ranking; do not search more policies.
+
+F4 has now failed the same Buying MRR gate as F3. Field-ranking exploration
+is stopped; no field variant gets Shadow or confirmation evaluation. Only
+the isolated constraints candidate remains for robustness-only validation.
+For its three timing pairs, use sequential fresh processes without CPU pinning,
+in baseline/candidate order each pair, with no other task benchmark in parallel.
+No rerun-selection or tolerance change after those measurements.
+Timing baseline loads the original ranker and controller from commit 2181f99
+in its child process; record their hashes, leaving the worktree untouched.
+This charges candidate hot-path overhead against the actual pre-task code,
+not only against another policy inside the newly expanded ranker.
+
+Final TASK-006 decision: F1-F4 remain disabled; constraints passes all three
+quality sets without any metric change, three timing pairs and full regression.
+Promote constraints ONLY as a correctness fix in default integrated mode.
+Baseline/adaptive mode defaults remain unchanged. No score-gain claim or
+further tuning. See docs/team/TASK-006-OFFLINE.md for raw hashes and limitations.

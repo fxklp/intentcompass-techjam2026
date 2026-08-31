@@ -39,7 +39,10 @@ class AdaptiveController:
             self.retriever = backend(catalog_path)
         self.mode = config.mode
         self.backend_name = config.retrieval
-        self.offline_ranking = os.environ.get("INTENTCOMPASS_OFFLINE_RANKING", "baseline")
+        self.offline_ranking = os.environ.get(
+            "INTENTCOMPASS_OFFLINE_RANKING",
+            "constraints" if self.mode == "integrated" else "baseline",
+        )
         self.field_evidence = None
         if self.offline_ranking.startswith("field_"):
             from solution.field_evidence import FieldEvidence
@@ -81,11 +84,16 @@ class AdaptiveController:
         # Popularity fallback is a compatibility promise: do not reinterpret
         # metadata from a no-match pool as query relevance or profile evidence.
         ranking_limit = max(output_limit, getattr(self.semantic, "candidate_limit", MAX_CANDIDATES)) if self.semantic.enabled else output_limit
-        ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
-            candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
-            primary_fields=self.field_evidence.get([c.parent_asin for c in candidates]) if self.field_evidence else None,
-            policy=self.offline_ranking,
-        )
+        if self.offline_ranking == "field_dominance" and not result.trace.fallback_used:
+            from solution.field_evidence import refine_by_dominance
+            ranked = rank_candidates(candidates, state, ranking_limit, policy="constraints")
+            ranked = refine_by_dominance(ranked, state, self.field_evidence.get([c.parent_asin for c in ranked[:10]]))
+        else:
+            ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
+                candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
+                primary_fields=self.field_evidence.get([c.parent_asin for c in candidates]) if self.field_evidence else None,
+                policy=self.offline_ranking,
+            )
         context = session.memory.distill(state)
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
