@@ -1,128 +1,128 @@
-# Method, measurements and limitations
+# RC3 method, measurements and limitations
 
-## Actual release default
+## Actual frozen algorithm
 
-IntentCompass is a deterministic non-LLM shopping Agent. A thin official adapter
-delegates to a modular implementation. `reset` creates independent state;
-`respond` updates preference slots, retrieves up to 50 candidates from one
-in-memory SQLite FTS5/BM25 index, reranks by visible preferences and asks a
-non-repeating clarification using a fixed priority order. Invalid IDs and
-duplicate recommendations are not generated intentionally; acceptance checks
-validate every Public response before the unchanged evaluator scores it.
+IntentCompass is a deterministic non-LLM shopping Agent. Its thin official
+adapter delegates to modular session state, retrieval and policy code. RC3
+packages TASK-015 algorithm commit `4968804054bc1159007d34fe40e976bca508fb4f`
+without changing runtime source. RELEASE-MANIFEST records a separate packaging
+commit because release checks and documentation have changed.
 
-RC2 then stably prioritizes current category evidence within the same Top10.
-Ties keep their previous order. It never adds or removes a Top10 member, never
-promotes the tail, and leaves deterministic no-match fallback untouched. A
-bounded 512-entry cache stores only static catalog-query results. No dialogue,
-target labels or final answers are cached. Category ordering is not a new route.
+The active pipeline is:
 
-An explicit override replaces obsolete preferences. No-preference replies clear
-the relevant slot. Context is distilled into bounded current preferences and a
-safe profile snapshot. That snapshot is session-local and optionally exportable;
-it is not a persistent cross-session user model. The default ranking does not
-use profile priors to outweigh explicit requirements.
+1. Replace or clear structured preferences from current dialogue. Explicit
+   overrides discard obsolete values; no-preference replies mark slots free.
+2. Retrieve normally up to 50 candidates from one in-memory SQLite FTS5/BM25
+   index. Guarded terminal recovery can request a larger pool, so 50 is not
+   the unconditional maximum and there are not two active retrieval engines.
+3. Rank with visible constraints, then category and complete requirement
+   phrases within individual title/features/details fields. Category and
+   full-phrase ordering preserve their input Top10 membership.
+4. Within contiguous same-category/full-phrase groups, a strict title-evidence
+   superset can pass a neighboring item at retrieval-rank distance <= 3.
+   Incomparable evidence/ties retain input order; this step preserves
+   Top10 membership and tail.
+5. Guarded terminal recovery can change shown membership after explicit
+   rejection or repeated late-turn results. It is not unconditional diversity.
+6. Ask an available unasked attribute. After three consecutive explicit
+   no-preference replies, advance the eligible `other` question once.
+   Override/substantive replies reset this streak. Turn 10 asks no new question.
 
-Workflow state labels buying/browsing, rejection and overload situations, but
-the frozen integrated configuration retains the same lexical retrieval backend
-and 50-candidate pool. Do not describe these labels as two active retrieval
-engines. The overload path can suppress optional model work; it does not stop
-all lexical retrieval. Clarification is state-aware, not learned question-value
-optimization or online self-improvement.
+Deterministic no-match popularity fallback is preserved. Budget and recognized
+negative preferences bypass the new evidence-ordering steps. Constraints are
+soft signals, not guaranteed filtering; missing metadata remains unknown.
+Title ordering shares PrecisionOrder's bounded field cache. Indexes remain
+in-memory, without industrial databases or downloaded models.
 
-The latest limited correctness fix distinguishes a simple negative material/color
-preference from a positive keyword, and an upper budget from a target price when
-already parsed into the budget slot. These are soft ranking signals, not guaranteed
-hard filtering. Unknown metadata remains unknown. Compound negation and unrestricted
-natural language are limitations.
+Context/profile snapshots are session-local, not persistent cross-session user
+models. Default ranking does not let profile priors outweigh explicit needs.
+Workflow labels do not constitute active dense retrieval, learned question
+optimization or autonomous online self-improvement.
 
-## Model, data and tool disclosure
+## Model, cost and data disclosure
 
-Default model: none. Default external APIs: none. Runtime dependencies: Python
-standard library, including SQLite FTS5. Development tools include Git/GitHub,
-Python unittest, PowerShell and AI coding assistance. There is no foundational
-model training, multimodal processing, external vector database or UI dependency.
+Default model/API: none. Runtime API cost and prompt/completion tokens: zero.
+Python standard library with SQLite FTS5 is sufficient; no GPU, foundational
+training, multimodal processing, real transactions or UI dependency.
 
-Data is the organizer-frozen Amazon Reviews 2023 catalog and released Public
-sessions, not scraped purchase histories or real customer interviews. We do not
-reconstruct organizer-private labels. Evaluation targets stay in the harness,
-not in production Agent inputs or decision rules. Preserve DATA_ATTRIBUTION.md.
+The catalog and Public sessions are organizer-frozen Amazon Reviews 2023-derived
+artifacts. Conversations are simulated, not real-user transcripts. Production
+policy reads visible catalog/dialogue only, never hidden targets or sample IDs.
+Preserve DATA_ATTRIBUTION.md and upstream terms. No private data, credentials,
+API budget ledger, model assets or generated indexes are packaged.
 
-Optional Qwen/DeepSeek rerankers and CPU dense/cross-encoder experiments exist in
-the full source. They are disabled in the release preset and are not prerequisites.
-Some small-screen API outcomes looked promising, but no tested API candidate met
-the full quality acceptance protocol. Do not claim that APIs outperform the strong
-offline default on the full benchmark. No provider key or budget ledger is packaged.
+Source contains inactive API/dense/multi-route support. These are NOT active
+default features or prerequisites. No tested API variant was accepted as
+superior to this final offline release under the full protocol. No API calls
+occurred during TASK-015 adoption or RC3 packaging. Prior development was not
+necessarily free: the historical ledger estimate was RMB9.110809 including
+uncertain requests, not a provider invoice or current account balance.
 
-## Evidence
+## Quality and explicitly accepted tradeoff
 
-The local Public evaluator produces HR@10 .91, MRR .648734, MTTC 4.255,
-Efficiency .6745 and TechnicalScore .784520 over 200 sessions. The release checker
-regenerates aggregate and all per-session results from the packaged source.
-The example demo hits on the first eligible turn 5 at rank 8. It is a selected
-Public demonstration, not a random unseen success rate.
+Each cell is preceding TASK-013 -> accepted TASK-015/RC3 algorithm.
 
-| Set | Sessions | RC1 MRR | Qualified RC2 MRR | HR, unchanged | MTTC, unchanged |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Public development | 200 | .624024 | .648734 | .910 | 4.255 |
-| Original synthetic Shadow | 200 | .630488 | .656149 | .895 | 3.805 |
-| New synthetic confirmation | 800 | .658917 | .689676 | .93375 | 3.52875 |
+| Set | N | HitRate@10 | MRR | MTTC (lower better) | Local technical composite |
+|---|---:|---|---|---|---|
+| Public | 200 | .975 -> .980 | .693046 -> .696861 | 4.190 -> 3.755 | .831614 -> .843958 |
+| Synthetic Shadow | 200 | .960 -> .965 | .698732 -> .703615 | 3.740 -> 3.545 | .834820 -> .842684 |
+| Existing TASK-014 A | 800 | .94875 -> .95625 | .694759 -> .695408 | 3.73125 -> 3.45375 | .828178 -> .837672 |
+| Existing TASK-014 B | 800 | .95125 -> .95625 | .698647 -> .698810 | 3.81875 -> 3.515 | .828844 -> .837468 |
 
-All four scenario groups passed HR/MRR/MTTC non-regression on every set. The
-confirmation seed was fixed before results and excludes Public and original
-Shadow targets. These are the same official simulator over the same catalog,
-not real users or the organizer's hidden set. Public was used for development;
-six candidates were selected for validation, and only one survived Shadow.
-Neither repeated development nor multi-candidate selection is an unbiased test.
-No quality rule was changed after validation results.
+Overall HR/MRR/MTTC improve on all four sets, but NOT all scenario MRR values:
+A/buying decreases .692729 -> .690502; B/intent override decreases
+.633509 -> .629838. The lead explicitly accepted those two decreases.
+Historical strict non-regression rejection was preserved, not rewritten as
+a pass. Every scenario HR is non-decreasing and MTTC non-increasing.
 
-The qualified research candidate was frozen at
-799e590fd10eda9fd401544473c5e34cf6163ec2. Three alternating Windows/Python 3.13.9
-fresh-process comparisons pinned each child to the same first allowed CPU.
-RC1 p95: 73.2701 / 76.8675 / 76.6319 ms. Candidate: 75.6954 / 75.0890 / 74.3092 ms.
-Medians: 76.6319 versus 75.0890 ms; maximum peak RSS: 455663616 versus 455176192
-bytes; initialization medians: 3.248207 versus 3.283451 seconds. This passes the
-predeclared +5% p95 / +16MiB memory gates, not a claim of substantial speedup.
-The small extracted RC2 implementation must separately reproduce the candidate;
-the handoff ledger records final-source and archive checks. Memory includes the
-evaluator's catalog too; the ZIP checker is not a standardized speed benchmark.
+The selected TASK-014 candidate was frozen before A/B confirmation. TASK-015
+then extracted accepted logic and reproduced these SAME sets; repetitions are
+not new independent validation. Public/Shadow were repeatedly used during
+development. Synthetic sets use the same simulator/catalog; they are not the
+organizer-hidden set or evidence from real users.
 
-Final extracted runtime 8c61d545070507f25966e6e2d8ad82683464768c reproduced all
-1,200 validation sessions' required comparisons. Its separate three alternating
-speed pairs were RC1 81.0937 / 86.6105 / 81.2731 ms versus RC2
-84.4104 / 84.1666 / 79.7730 ms. Median p95 increased from 81.2731 to 84.1666 ms
-(about 3.56%), within the predeclared 5% tolerance; do NOT describe RC2 as faster.
-The ranges overlap and timings vary with host activity. Maximum process peak
-RSS was 456077312 versus 455266304 bytes; median initialization was 3.348535
-versus 3.333650 seconds. No measured memory regression. Later documentation-only
-commits do not change this measured runtime. Cross-machine timing remains untested.
+The bundle checker regenerates all 200 Public results with the unchanged
+evaluator and checks aggregate/scenario metrics, active policy, output schema,
+reset, catalog/source integrity, zero network/tokens and the real Demo.
+The selected Public Demo hits after override on turn 5 at rank 8, not a random
+unseen success rate. TechnicalScore is an input to technical assessment,
+not the contest total or a judging guarantee.
 
-Default scoring uses zero model tokens and has estimated API cost RMB0. This is
-not a claim that development was free: the last recorded API experiment ledger
-conservatively reserved/charged RMB9.110809, including uncertain requests. That
-is a development estimate, not a provider invoice. No API calls occur in this stage.
+## Runtime measurements
 
-## Why freeze here, and what remains
+TASK-015 used three alternating sequential fresh-process pairs on Windows,
+Python 3.13.9, pinned to the same first allowed CPU. These measure the exact
+algorithm shipped here; packaging itself does not justify a speed claim.
 
-This round studied product-search methods in the Amazon Reviews 2023/BLaIR
-paper, Amazon ESCI/KDD Cup author solutions, retrieve/rerank guides and SQLite
-documentation. The implementation is original, without copied external code or
-new models/data. Category/phrase evidence, conjunction/RRF routing, IDF,
-clarification, dominance and cache/SQL controls were evaluated. Only conservative
-category-head ordering is promoted. A broader phrase-head candidate raised
-Shadow overall MRR but reduced Override MRR by .000463; it was still rejected.
-Pool policies improved HR/MTTC but harmed at least one scenario's MRR. Dense,
-cross-encoder and paid candidates from earlier rounds also remain disabled.
+| Metric | TASK-013 | Accepted final algorithm |
+|---|---:|---:|
+| Median initialization | 3.467128 s | 3.242453 s |
+| Median response p50 | 18.6652 ms | 25.6621 ms |
+| Median response p95 | 96.9776 ms | 102.4571 ms |
+| Median response p99 | 135.3821 ms | 141.0839 ms |
+| Responses over the same 200 sessions | 833 | 747 |
+| Maximum whole-process peak memory | 463351808 bytes | 462934016 bytes |
 
-Finite experiments cannot prove global optimality. Under the unchanged strict
-non-regression rule, no tested further method improved HR/MTTC without a tradeoff.
+P95 increases approximately 5.48 ms; do not call RC3 faster. Earlier conversion
+yields fewer responses, so per-response distributions do not contain identical
+turns. Memory includes evaluator/catalog overhead. Startup/memory differences
+are small observations, not architectural guarantees. Host/platform affect
+measurements; release-check wall time is not a standardized speed benchmark.
+Mac timing has not been independently measured.
 
-Remaining weaknesses: semantic lexical-recall gap, fixed clarification order,
-limited personalization and workflow adaptation, soft rather than guaranteed
-constraints, non-zero index startup and no real-user/business validation. Public
-results are not a prediction of hidden performance or commercial conversion.
-More time should go to target-blind semantic retrieval and independently validated
-question selection, not answer-specific rules or post-deadline tuning.
+## Limitations and release boundary
 
-The final evaluation package, cross-machine signoff, public video, final Devpost
-description and submitted public repository commit remain separate acceptance
-items. A passing local checker does not complete them.
+Lexical matching misses paraphrases and implicit intent. Clarification is
+bounded/rule-based, not learned. Personalization, workflow adaptation and strict
+constraint satisfaction remain limited. No global optimum or real transaction/
+business conversion validation is claimed. Full four-pillar coverage is not
+claimed; consult REQUIREMENTS.md.
+
+Research informed category/phrase/title evidence and dialogue recovery.
+Unselected lookahead/rare-term/other2 code was not copied into the final policy.
+No new algorithm research or tuning occurs during packaging.
+
+The ZIP is source-only; acquire the catalog separately and verify its checksum.
+Independent Windows/macOS signoff, public repository, video and submission
+remain separate actions through the lead. A local `RELEASE CHECK PASSED`
+does not complete those deliverables.

@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.build_release import included, scan_payload
-from scripts.release_check import PRESET, activate_preset, assert_public_metrics, safe_member, validate_payload, verify_manifest
+from scripts.release_check import ALGORITHM_COMMIT, PRESET, RELEASE_ID, activate_preset, assert_public_metrics, safe_member, validate_payload, verify_manifest
 
 
 class ReleaseTest(unittest.TestCase):
@@ -36,7 +36,7 @@ class ReleaseTest(unittest.TestCase):
             root=Path(directory)
             code=root/"agent.py"
             code.write_bytes(b"pass\n")
-            manifest={"source_commit":"a"*40,"preset":PRESET,"files":{"agent.py":hashlib.sha256(code.read_bytes()).hexdigest()}}
+            manifest={"schema_version":2,"release_id":RELEASE_ID,"algorithm_commit":ALGORITHM_COMMIT,"source_commit":"a"*40,"preset":PRESET,"files":{"agent.py":hashlib.sha256(code.read_bytes()).hexdigest()}}
             (root/"RELEASE-MANIFEST.json").write_text(json.dumps(manifest),encoding="utf-8")
             verify_manifest(root)
             code.write_bytes(b"print(1)\n")
@@ -72,18 +72,19 @@ class ReleaseTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             assert_public_metrics(result)
 
-    def test_rc2_gate_rejects_old_mrr_and_scenario_regression(self):
-        result = {"sample_count": 200, "hit_rate_at_10": .91, "mrr": .648734, "mttc": 4.255,
-                  "recommended_technical_score": .784520, "scenario_metrics": {}}
-        scenarios = {"boundary": (.9, .636667, 6), "browsing": (.95, .700898, 3.0625),
-                     "buying": (.925, .644435, 4.275), "intent_override": (.766667, .525119, 6.8)}
+    def test_rc3_gate_rejects_old_mrr_and_scenario_regression(self):
+        result = {"sample_count": 200, "hit_rate_at_10": .98, "mrr": .696861, "mttc": 3.755,
+                  "efficiency": .7245, "recommended_technical_score": .843958, "scenario_metrics": {},
+                  "reported_token_usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}}
+        scenarios = {"boundary": (10, 1., .678333, 5.), "browsing": (80, .9875, .745273, 2.95),
+                     "buying": (80, .9875, .70369, 3.4625), "intent_override": (30, .933333, .555728, 6.266667)}
         for name, values in scenarios.items():
-            result["scenario_metrics"][name] = dict(zip(("hit_rate_at_10", "mrr", "mttc"), values))
+            result["scenario_metrics"][name] = dict(zip(("sample_count", "hit_rate_at_10", "mrr", "mttc"), values))
         assert_public_metrics(result)
-        result["mrr"] = .624024
+        result["mrr"] = .648734
         with self.assertRaises(ValueError):
             assert_public_metrics(result)
-        result["mrr"] = .648734
+        result["mrr"] = .696861
         result["scenario_metrics"]["buying"]["mrr"] -= .001
         with self.assertRaises(ValueError):
             assert_public_metrics(result)

@@ -1,4 +1,4 @@
-# Release requirements audit — 2026-08-31
+# RC3 release requirements audit — 2026-08-31
 
 This is a technical/claim audit, not an organizer certification. Current sources:
 
@@ -30,9 +30,9 @@ Devpost deadline; use the frozen submitted commit and unchanged final evaluator.
 | Track 4.2 feature | Actual default status |
 | --- | --- |
 | Buying/Browsing split | Rule-derived routing labels exist; separate precision/dense engines are not active. Partial. |
-| Multi-route keyword/category/vector + LLM ranking | Lexical FTS, constraint rerank and within-Top10 category ordering active. Category ordering is NOT a second retrieval route. Dense, multi-route and LLM experiments disabled. Not covered by default. |
+| Multi-route keyword/category/vector + LLM ranking | Lexical FTS, constraints, category/full-phrase/title evidence and guarded terminal recovery active. These are NOT dense or separate simultaneous retrieval engines. Dense, multi-route and LLM experiments disabled. Not covered by default. |
 | Information accumulation / intent replacement | Implemented in structured slots; reset/override tests and demo. |
-| Over-generality retrieval cutoff / proactive clarification | Structured state-aware questions; not a learned question policy or full lexical cutoff. Partial. |
+| Over-generality retrieval cutoff / proactive clarification | Structured questions plus an earlier eligible `other` question after three no-preference replies; not a learned question policy or full lexical cutoff. Partial. |
 | Personalized context distillation | Bounded context and updated session-local profile export. No persistent cross-session model. Partial. |
 | Workflow re-orchestration / self-evolving guidance | Explicit workflow state exists, but frozen retrieval/question policy remains conservative. Partial. |
 | HR/MRR/MTTC evaluation | Full Public measurement; no claim of official final performance. |
@@ -68,7 +68,10 @@ No definitive total-score prediction is issued from these conflicting weights.
 Technical evidence is strongest in reproducibility and constraints/state handling;
 innovation, full pipeline coverage and real-user impact remain weaker. The old
 66/90 internal estimate is not an official score and is not upgraded because
-packaging exists. RC2 TechnicalScore .784520 is a separate benchmark composite.
+packaging exists. RC3 Public TechnicalScore .843958 is a separate benchmark composite.
+The accepted final policy improves overall metrics but retains two disclosed
+synthetic-scenario MRR decreases; see METHOD.md. Do not claim all-scenario
+non-regression or use packaging as a new quality experiment.
 
 Devpost currently gives **September 1, 2026, 12:00 noon GMT+8** as the submission
 deadline, not midnight. The submitted commit is frozen then. Do not change the

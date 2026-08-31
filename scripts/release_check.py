@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import platform
 import re
@@ -18,6 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+RELEASE_ID = "intentcompass-rc3"
+ALGORITHM_COMMIT = "4968804054bc1159007d34fe40e976bca508fb4f"
 PRESET = {
     "INTENTCOMPASS_AGENT_MODE": "integrated",
     "INTENTCOMPASS_RETRIEVAL": "baseline",
@@ -25,6 +28,9 @@ PRESET = {
     "INTENTCOMPASS_SEMANTIC": "off",
     "INTENTCOMPASS_LLM_ALLOW_NETWORK": "0",
     "INTENTCOMPASS_CATEGORY_ORDER": "head",
+    "INTENTCOMPASS_TERMINAL_RECOVERY": "lastchance",
+    "INTENTCOMPASS_PRECISION_ORDER": "separate",
+    "INTENTCOMPASS_FINAL_POLICY": "on",
 }
 SECRET_ENV = {"OPENAI_API_KEY", "DASHSCOPE_API_KEY", "DEEPSEEK_API_KEY"}
 
@@ -51,6 +57,9 @@ def safe_member(name: str) -> bool:
 
 def verify_manifest(root: Path) -> dict:
     manifest = json.loads((root / "RELEASE-MANIFEST.json").read_text(encoding="utf-8"))
+    if (manifest.get("schema_version") != 2 or manifest.get("release_id") != RELEASE_ID
+            or manifest.get("algorithm_commit") != ALGORITHM_COMMIT):
+        raise ValueError("unexpected release version or algorithm freeze")
     if not re.fullmatch(r"[0-9a-f]{40}", manifest.get("source_commit", "")):
         raise ValueError("invalid source commit")
     if manifest.get("preset") != PRESET or not manifest.get("files"):
@@ -89,19 +98,46 @@ def validate_payload(payload: dict, catalog_ids: set[str], top_k: int = 10) -> N
 
 def assert_public_metrics(result: dict) -> None:
     # Test-side expectations only: never passed to production Agent.
-    expected = {"sample_count": 200, "hit_rate_at_10": .91, "mrr": .648734, "mttc": 4.255,
-                "recommended_technical_score": .784520}
-    scenarios = {"boundary": (.9, .636667, 6), "browsing": (.95, .700898, 3.0625),
-                 "buying": (.925, .644435, 4.275), "intent_override": (.766667, .525119, 6.8)}
+    expected = {"sample_count": 200, "hit_rate_at_10": .98, "mrr": .696861, "mttc": 3.755,
+                "efficiency": .7245, "recommended_technical_score": .843958}
+    scenarios = {"boundary": (10, 1., .678333, 5.), "browsing": (80, .9875, .745273, 2.95),
+                 "buying": (80, .9875, .70369, 3.4625), "intent_override": (30, .933333, .555728, 6.266667)}
+
+    def same(actual, expected):
+        return (type(actual) in (int, float) and math.isfinite(actual)
+                and abs(actual-expected) <= 1e-6)
+
     for key, value in expected.items():
-        if abs(result[key] - value) > 1e-6:
+        if not same(result.get(key), value):
             raise ValueError(f"frozen Public metric mismatch: {key}")
     if set(result["scenario_metrics"]) != set(scenarios):
         raise ValueError("missing scenario")
     for name, values in scenarios.items():
-        for key, value in zip(("hit_rate_at_10", "mrr", "mttc"), values):
-            if abs(result["scenario_metrics"][name][key] - value) > 1e-6:
+        for key, value in zip(("sample_count", "hit_rate_at_10", "mrr", "mttc"), values):
+            if not same(result["scenario_metrics"][name].get(key), value):
                 raise ValueError(f"frozen scenario metric mismatch: {name}.{key}")
+    if result.get("reported_token_usage") != {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}:
+        raise ValueError("frozen release must report zero total model tokens")
+
+
+def verify_runtime(agent) -> dict:
+    core = agent._core._adaptive
+    effective = {"mode": core.mode, "retrieval": core.backend_name, "ranking": core.offline_ranking,
+                 "semantic_enabled": core.semantic.enabled, "category_order": core.category_order is not None,
+                 "terminal_recovery": core.terminal.mode if core.terminal else "off",
+                 "precision_order": core.precision.variant if core.precision else "off",
+                 "final_policy": core.final_policy is not None}
+    if effective != {"mode": "integrated", "retrieval": "baseline", "ranking": "constraints",
+                     "semantic_enabled": False, "category_order": True, "terminal_recovery": "lastchance",
+                     "precision_order": "separate", "final_policy": True}:
+        raise ValueError("effective runtime is not frozen RC3 offline preset")
+    return effective
+
+
+def assert_demo(result: dict) -> None:
+    if (result.get("hit") is not True or result.get("override_seen") is not True
+            or result.get("first_hit_turn") != 5 or result.get("best_rank") != 8):
+        raise ValueError("frozen intent-override demo mismatch")
 
 
 def main() -> None:
@@ -120,7 +156,7 @@ def main() -> None:
     require_hash(catalog, CATALOG_SHA256, "catalog")
     with sqlite3.connect(":memory:") as db:
         db.execute("CREATE VIRTUAL TABLE fts_probe USING fts5(text)")
-    protected = {p.relative_to(ROOT).as_posix(): sha256(p) for p in [catalog, ROOT / "data/public_set.jsonl", *sorted((ROOT / "evaluator").glob("*.py")), *sorted((ROOT / "solution").rglob("*.py")), *sorted((ROOT / "starter").glob("*.py"))]}
+    protected = {p.relative_to(ROOT).as_posix(): sha256(p) for p in [catalog, ROOT / "data/public_set.jsonl", *sorted((ROOT / "evaluator").glob("*.py")), *sorted((ROOT / "solution").rglob("*.py")), *sorted((ROOT / "starter").glob("*.py")), *sorted((ROOT / "scripts").glob("*.py")), *sorted((ROOT / "demo").rglob("*.py"))]}
     network_attempts = []
     invalid_outputs = []
 
@@ -135,9 +171,7 @@ def main() -> None:
         ids, categories, products = catalog_index(catalog)
         agent = Agent(catalog)
         try:
-            if (agent._core._adaptive.offline_ranking != "constraints" or agent._core._adaptive.semantic.enabled
-                    or agent._core._adaptive.category_order is None):
-                raise ValueError("effective runtime is not frozen offline preset")
+            effective_runtime = verify_runtime(agent)
             for sid in ("release-smoke-a", "release-smoke-b"):
                 agent.reset(sid, {})
             first = agent.respond("release-smoke-a", "I'm looking for shoes.", 1, 10)
@@ -168,6 +202,7 @@ def main() -> None:
             raise ValueError(f"invalid Agent responses: {len(invalid_outputs)}")
         assert_public_metrics(result)
         demo_result = run_session(verbose=True)
+        assert_demo(demo_result)
     if network_attempts:
         raise ValueError(f"network attempted {len(network_attempts)} times")
     if any(sha256(ROOT / name) != value for name, value in protected.items()):
@@ -176,7 +211,11 @@ def main() -> None:
         verify_manifest(ROOT)
     report = {
         "status": "RELEASE CHECK PASSED", "source_commit": manifest["source_commit"] if manifest else None,
-        "python": platform.python_version(), "platform": platform.platform(), "sqlite": sqlite3.sqlite_version,
+        "release_id": RELEASE_ID, "algorithm_commit": ALGORITHM_COMMIT,
+        "manifest_sha256": sha256(ROOT / "RELEASE-MANIFEST.json") if manifest else None,
+        "python": platform.python_version(), "python_executable": sys.executable,
+        "platform": platform.platform(), "machine": platform.machine(), "sqlite": sqlite3.sqlite_version,
+        "effective_runtime": effective_runtime,
         "preset": PRESET, "ignored_environment_names": removed, "network_attempts": 0,
         "metrics": {k: v for k, v in result.items() if k != "sessions"}, "demo": demo_result,
         "protected_sha256": protected, "results_sha256": sha256(output / "results.json"),

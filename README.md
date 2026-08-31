@@ -5,7 +5,7 @@ replaceable preferences, searches a frozen catalog, asks structured clarificatio
 questions and returns ranked product identifiers. No UI or transaction service.
 The customer conversations are simulated, not real-user conversations.
 
-## Start here: RC2 offline default
+## Start here: RC3 final offline algorithm
 
 Use **Python 3.12 or 3.13 with SQLite FTS5**. No third-party Python package, GPU,
 downloaded model, API key, paid service or external database is required.
@@ -29,9 +29,14 @@ The checker rejects altered/missing payloads. The ZIP needs no Git executable;
 catalog, credentials, model assets, caches and API ledger are excluded.
 Verify its checksum against the team lead's handoff before extraction.
 
-The preset is `integrated / baseline FTS / constraints / category head / semantic off / network off`.
-RC2 stably reorders the same Top10 using the user's current category. It does
-not change Top10 membership, retrieval queries, clarification or stopping rules.
+The preset is `integrated / baseline FTS / constraints / category head /
+terminal lastchance / precision separate / final policy on / semantic off / network off`.
+RC3 packages the accepted TASK-015 final algorithm: category/full-phrase/title
+evidence ordering, guarded terminal recovery and a bounded clarification change
+after three consecutive no-preference replies. Official scoring/stopping rules
+remain unchanged. The algorithm freeze is
+`4968804054bc1159007d34fe40e976bca508fb4f`; the bundle manifest also records its
+separate packaging source commit. Never mix RC1/RC2 files with this version.
 The checker does not modify the parent shell's environment or the algorithm.
 Optional experiments in the source tree are **not active default capabilities**.
 
@@ -77,22 +82,28 @@ acceptance check for final evaluation or tune after seeing final labels.
 | Metric | Frozen offline default |
 | --- | ---: |
 | Sessions | 200 |
-| HitRate@10 | 0.910000 |
-| MRR | 0.648734 |
-| MTTC | 4.255000 |
-| Efficiency | 0.674500 |
-| TechnicalScore | 0.784520 |
+| HitRate@10 | 0.980000 |
+| MRR | 0.696861 |
+| MTTC | 3.755000 |
+| Efficiency | 0.724500 |
+| TechnicalScore | 0.843958 |
 | Default model tokens / API cost | 0 |
 
 TechnicalScore is an input to Technical Execution, **not the contest total**.
 The official weak starter's published HR/MRR/MTTC are .125/.068034/9.81.
 Later experiments were compared with our strong .91 baseline, not that starter.
-Compared with RC1, MRR improves from .624024 to .648734; HR and MTTC are unchanged.
-The selected category ordering also passed original Shadow and a predeclared
-800-session synthetic confirmation, across all four scenarios. Other field,
-dense/API and multi-route candidates failed one or more gates and remain off.
-See [method and limitations](docs/release/METHOD.md). This is a precision gain,
-not a claim that all three metrics increased or that the Agent is globally optimal.
+Compared with the preceding TASK-013 algorithm, all three overall metrics improve
+on Public, Shadow and two existing synthetic 800-session sets. Two small
+scenario MRR decreases were explicitly accepted: A/buying .692729 -> .690502;
+B/intent override .633509 -> .629838. This is NOT all-scenario non-regression.
+The final extraction reproduced the selected candidate exactly on those same
+sets; repeated reproduction is not new independent validation.
+See [method and limitations](docs/release/METHOD.md). No hidden-set or global
+optimality claim is made. Optional dense/API/multi-route experiments remain off.
+
+TASK-015 controlled Windows measurements: response p50 25.66 ms, p95 102.46 ms,
+p99 141.08 ms; p95 about 5.48 ms above TASK-013. These are machine-specific
+three-pair medians, not speed guarantees for your machine.
 
 ## Current rules and capability boundary
 
@@ -132,7 +143,7 @@ These require the full Git checkout, not the compact released ZIP:
 ```text
 python -m unittest discover -s tests -p "test_*.py"
 python scripts/team_gate.py --full-eval
-python scripts/build_release.py --output artifacts/release/intentcompass.zip
+python scripts/build_release.py --output artifacts/release/intentcompass-rc3.zip
 ```
 
 The builder requires a clean committed tree and a new output path. One optional
@@ -150,3 +161,7 @@ Devpost requires an English description, public repository with README and a
 **public three-minute YouTube demo**. Passing technical checks does not complete
 video production or submission. See [recording guidance](docs/release/VIDEO-HANDOFF.md).
 These tools never upload a video or submit a project.
+
+For independent Windows/macOS acceptance, use the [team test instructions](docs/release/TEAM-TEST.md).
+Send the new ZIP, its external SHA256 and returned evidence through the team lead.
+Independent teammate acceptance remains pending until their actual results arrive.

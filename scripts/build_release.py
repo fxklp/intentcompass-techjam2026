@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.release_check import PRESET, safe_member
+from scripts.release_check import ALGORITHM_COMMIT, PRESET, RELEASE_ID, safe_member
 
 EXACT = {"README.md", "requirements.txt", "DATA_ATTRIBUTION.md", "data/public_set.jsonl",
          "scripts/setup_data.py", "scripts/release_check.py", "scripts/run_offline.py", "docs/agent_api_contract.json",
@@ -52,7 +52,8 @@ def main() -> None:
         payload[name] = content
     if not EXACT.issubset(payload):
         raise ValueError("missing required release file")
-    manifest = {"schema_version": 1, "source_commit": commit, "preset": PRESET,
+    manifest = {"schema_version": 2, "release_id": RELEASE_ID, "algorithm_commit": ALGORITHM_COMMIT,
+                "source_commit": commit, "preset": PRESET,
                 "files": {name: hashlib.sha256(content).hexdigest() for name, content in payload.items()},
                 "excluded": ["catalog (download using setup_data.py)", "credentials", "models", "indexes", "API budget ledger", "private/final labels", "Git metadata", "historical experiment outputs"],
                 "integrity_note": "Checksums detect accidental changes; this is not a digital signature."}
