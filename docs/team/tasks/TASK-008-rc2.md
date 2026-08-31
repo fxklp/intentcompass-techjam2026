@@ -51,3 +51,12 @@ extract into a NEW smoke directory, and run its strict release checker without
 network or credentials. Record ZIP/results SHA256 and source commit. Existing
 RC1 archives/directories must not be overwritten. Cross-machine signoff and
 public publication remain separate actions through the team lead.
+
+## Completed qualification before packaging
+
+The research candidate passed its 800-target confirmation without any overall
+or scenario regression. Extracted runtime 8c61d545070507f25966e6e2d8ad82683464768c
+then matched frozen Public per-session results and all three sets' metrics.
+158 tests and the full team gate passed. Final-source speed/memory gates passed:
+median p95 +3.56% (within the predeclared 5%), maximum RSS decreased. This is not
+claimed as a speed improvement. Only documentation was changed afterward.

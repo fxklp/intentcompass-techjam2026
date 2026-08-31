@@ -1,6 +1,6 @@
 # Method, measurements and limitations
 
-## Actual submitted default
+## Actual release default
 
 IntentCompass is a deterministic non-LLM shopping Agent. A thin official adapter
 delegates to a modular implementation. `reset` creates independent state;
@@ -85,6 +85,16 @@ predeclared +5% p95 / +16MiB memory gates, not a claim of substantial speedup.
 The small extracted RC2 implementation must separately reproduce the candidate;
 the handoff ledger records final-source and archive checks. Memory includes the
 evaluator's catalog too; the ZIP checker is not a standardized speed benchmark.
+
+Final extracted runtime 8c61d545070507f25966e6e2d8ad82683464768c reproduced all
+1,200 validation sessions' required comparisons. Its separate three alternating
+speed pairs were RC1 81.0937 / 86.6105 / 81.2731 ms versus RC2
+84.4104 / 84.1666 / 79.7730 ms. Median p95 increased from 81.2731 to 84.1666 ms
+(about 3.56%), within the predeclared 5% tolerance; do NOT describe RC2 as faster.
+The ranges overlap and timings vary with host activity. Maximum process peak
+RSS was 456077312 versus 455266304 bytes; median initialization was 3.348535
+versus 3.333650 seconds. No measured memory regression. Later documentation-only
+commits do not change this measured runtime. Cross-machine timing remains untested.
 
 Default scoring uses zero model tokens and has estimated API cost RMB0. This is
 not a claim that development was free: the last recorded API experiment ledger
