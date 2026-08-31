@@ -73,13 +73,23 @@ class AdaptiveController:
             raise ValueError("invalid precision ordering mode")
         self.precision = (PrecisionOrder(self.retriever.index, precision_mode)
                           if precision_mode != "off" and self.category_order is not None else None)
+        from solution.final_policy import DEFAULT as FINAL_DEFAULT, VARIANTS as FINAL_VARIANTS, FinalPolicy
+        final_mode = os.environ.get("INTENTCOMPASS_FINAL_POLICY", FINAL_DEFAULT)
+        if final_mode not in FINAL_VARIANTS:
+            raise ValueError("INTENTCOMPASS_FINAL_POLICY must be on or off")
+        self.final_policy = (FinalPolicy(self.retriever.index, self.precision)
+                             if final_mode == "on" and self.precision is not None else None)
 
     def reset(self, session_id: str, profile: dict) -> None:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
+        if self.final_policy is not None:
+            self.final_policy.reset(session_id)
         if self.terminal:
             self.terminal.reset(session_id)
 
     def close(self) -> None:
+        if self.final_policy is not None:
+            self.final_policy.close()
         if self.precision is not None:
             self.precision.close()
         if self.terminal:
@@ -127,6 +137,8 @@ class AdaptiveController:
             ranked = self.category_order.reorder(ranked, state.category, fallback=result.trace.fallback_used)
         if self.precision is not None:
             ranked = self.precision.reorder(ranked, state, fallback=result.trace.fallback_used)
+        if self.final_policy is not None:
+            ranked = self.final_policy.reorder(ranked, state, fallback=result.trace.fallback_used)
         if self.terminal:
             if request.limit > 50:
                 head = candidates[:output_limit] if result.trace.fallback_used else rank_candidates(
@@ -134,6 +146,8 @@ class AdaptiveController:
                 head = self.category_order.reorder(head, state.category, fallback=result.trace.fallback_used)
                 if self.precision is not None:
                     head = self.precision.reorder(head, state, fallback=result.trace.fallback_used)
+                if self.final_policy is not None:
+                    head = self.final_policy.reorder(head, state, fallback=result.trace.fallback_used)
                 ids = {c.parent_asin for c in head}
                 ranked = [*head, *(c for c in ranked if c.parent_asin not in ids)]
             ranked = self.terminal.reorder(candidates, state, ranked, message, output_limit, fallback=result.trace.fallback_used)
@@ -149,6 +163,9 @@ class AdaptiveController:
         ranked = ranked[:output_limit]
         if self.mode == "integrated":
             attribute, question_message = choose_question(state)
+            if self.final_policy is not None:
+                attribute, question_message = self.final_policy.question(
+                    state, candidates, message, fallback=result.trace.fallback_used, output_limit=output_limit)
             if turn >= 10:
                 attribute, question_message = None, "Here are the closest matches for your current preferences."
             question = Clarification(attribute, question_message, "stable_priority_under_overload", len(candidates) > max(10, output_limit*2))
