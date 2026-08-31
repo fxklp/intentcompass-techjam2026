@@ -32,6 +32,7 @@ class DenseIndex:
         if len(self.ids) != manifest.get("products") or not np.allclose(np.linalg.norm(self.vectors, axis=1), 1, atol=1e-4):
             raise ValueError("dense matrix not normalized")
         self.encoder = LocalModel(directory / "embedding", "embedding")
+        self.positions = {identifier: index for index, identifier in enumerate(self.ids)}
         self.cache = OrderedDict()
 
     def search(self, query: str, limit: int) -> list[tuple[str, float]]:
@@ -52,3 +53,7 @@ class DenseIndex:
         if len(self.cache) > 128:
             self.cache.popitem(last=False)
         return rows
+
+    def similarity(self, left: str, right: str) -> float:
+        """Catalog-vector similarity for bounded browsing diversification."""
+        return float(self.vectors[self.positions[left]] @ self.vectors[self.positions[right]])

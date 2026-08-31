@@ -134,7 +134,12 @@ class SessionState:
 
     def _apply_plain_reply(self, text: str, turn: int) -> None:
         """Accept ordinary slot replies without treating feedback as a preference."""
-        if re.search(r"not (?:quite |really )?right|none of|something else|still exploring", text, re.I):
+        if re.search(
+            r"not (?:quite |really )?right|none of|something else|still exploring|"
+            r"just browsing|not sure what|surprise me",
+            text,
+            re.I,
+        ):
             return
         if text.lower() in {"yes", "no", "thanks", "thank you", "ok", "okay", "..."}:
             return

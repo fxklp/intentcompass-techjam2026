@@ -18,5 +18,9 @@ class Agent:
         """Release local resources used by the optional offline retriever."""
         self._core.close()
 
+    def export_profile(self, session_id: str) -> dict:
+        """Explicit profile handoff; the host chooses the next reset/user."""
+        return self._core.export_profile(session_id)
+
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
         return self._core.respond(session_id, user_message, turn, top_k)

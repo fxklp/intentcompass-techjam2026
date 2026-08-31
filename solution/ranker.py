@@ -89,7 +89,9 @@ def rank_candidates(
         for value_tokens in prior_values:
             if value_tokens:
                 prior_boost = max(prior_boost, len(value_tokens & document_tokens) / len(value_tokens))
-        combined = boost - 0.35 * candidate.retrieval_rank + 0.6 * prior_boost
+        # Profile is a real but bounded tie-break.  Explicit boost remains the
+        # first sort key below, so a prior cannot defeat stronger current intent.
+        combined = boost - 0.35 * candidate.retrieval_rank + 1.0 * prior_boost
         if policy == "field_top10":
             baseline_keys[candidate.parent_asin] = (-boost, -combined, candidate.retrieval_rank, candidate.parent_asin) if profile_priors else (-combined, candidate.retrieval_rank, candidate.parent_asin)
         primary = (primary_fields or {}).get(candidate.parent_asin, "")

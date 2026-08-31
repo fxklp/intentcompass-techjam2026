@@ -9,6 +9,7 @@ from solution.state import SessionState
 
 REJECTION_RE = re.compile(r"not (?:quite |really )?right|none of (?:these|those)|something else", re.I)
 HARD_ATTRIBUTES = frozenset({"material", "color", "size", "brand", "budget", "feature"})
+GENERIC_CATEGORIES = frozenset({"anything", "something", "item", "items", "product", "products", "clothes", "clothing"})
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,7 @@ class WorkflowPlan:
     pool_limit: int
     recovery: bool
     reason: str
+    skip_expensive: bool = False
 
 
 @dataclass
@@ -34,6 +36,14 @@ class WorkflowState:
             self.rejected_turns += 1
         buying = bool(set(state.preferences) & HARD_ATTRIBUTES)
         route = "buying" if buying else "browsing"
+        category = (state.category or "").strip().casefold()
+        broad_language = bool(re.search(
+            r"\b(?:anything|something|not sure|still exploring|just browsing|surprise me)\b",
+            message,
+            re.I,
+        ))
+        if not buying and (not category or category in GENERIC_CATEGORIES) and broad_language:
+            return WorkflowPlan("browsing", 0, False, "pre_retrieval_cutoff", True)
         if self.last_fallback or self.rejected_turns >= 2:
             # Query broadens, explicit preferences still apply at ranking time.
             return WorkflowPlan(route, 80, True, "recover_after_miss_or_rejection")

@@ -156,6 +156,13 @@ class Agent:
         else:
             self._retriever.close()
 
+    def export_profile(self, session_id: str) -> dict:
+        """Return a safe explicit snapshot for a caller-managed future reset."""
+        normalized_id = str(session_id)
+        if self._adaptive is None or normalized_id not in self._sessions:
+            raise KeyError(normalized_id)
+        return self._adaptive.export_profile(normalized_id)
+
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
         if not 1 <= int(turn) <= 10:
             raise ValueError("official session turn must be between 1 and 10")
