@@ -4,6 +4,7 @@ import json
 import math
 import re
 import sqlite3
+import sys
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
@@ -35,7 +36,7 @@ def float_or_none(value: object) -> float | None:
         return None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ProductRecord:
     parent_asin: str
     searchable_text: str
@@ -86,7 +87,7 @@ class FTS5CatalogIndex:
                     parent_asin=parent_asin,
                     searchable_text=" ".join(fields),
                     price=price,
-                    categories=tuple(str(value) for value in product.get("categories") or ()),
+                    categories=tuple(sys.intern(str(value)) for value in product.get("categories") or ()),
                 )
                 popularity.append((math.log1p(max(0, rating_count)) * rating, rating, parent_asin))
                 batch.append((parent_asin, *fields))

@@ -153,5 +153,35 @@ not advertised as improvements. Existing `adaptive` behavior remains available
 for reproducing TASK-003; it is not promoted. The legacy OpenAI adapter is not
 used in this authorized Qwen/DeepSeek experiment stage.
 
+## Preliminary strict judge simulation (offline stage only)
+
+This is the integration owner's subjective simulation, NOT an official score,
+not a passing-score claim and not the final review requested after API testing.
+The 10% final-event communication criterion is unassessed.
+
+| Criterion | Provisional points | Evidence and deductions |
+| --- | ---: | --- |
+| Technical Execution | 28/35 | Official interface, 105 tests and stable scenario metrics; deduct for unvalidated live LLM ranking and model candidates that cannot be promoted |
+| Innovation & Problem Insight | 12/20 | Explicit replaceable state, context evolution and fail-closed orchestration; much is established engineering, dense/learned ranking brings no reliable gain yet |
+| Impact & Relevance | 12/20 | Reproducible shopping-search use case; no real-user outcome validation and organizer private accuracy unknown |
+| Feasibility & Practicality | 12/15 | CPU-only, offline, bounded cost and faster responses; excess memory deserves review, new implementation not yet independently tested on macOS |
+| Presentation & Communication | unassessed/10 | Final event only; no points invented |
+
+Provisional subtotal: 64/90 assessed points. Do not normalize this into an
+official 100-point result. Final submission artifacts/visibility are separate
+checks and are not marked complete here.
+
+Three alternating isolated Public runs at code commit `9d0ccd3` produced
+identical overall and scenario metrics. Median mean response latency:
+37.680934 -> 22.822889 ms; median p95: 77.1353 -> 71.4922 ms.
+Median peak RSS: 443,318,272 -> 471,449,600 bytes (+26.83 MiB), exceeding
+the predeclared 16 MiB review threshold. Files: `task004-timing-*.json`.
+
+Cautious follow-up is limited to `ProductRecord` storage: slots plus interning
+repeated immutable category strings, with no score/query/ID/order changes.
+Re-run independent measurements and all tests; reject if any quality regresses.
+The local candidate branch may default to integrated lexical mode after these
+checks, while main remains unchanged and not independently approved.
+
 Final freeze decision, judge simulation and simple Liu/Cheng reproduction
 commands will be added only after the corresponding checks actually finish.

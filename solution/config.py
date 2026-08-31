@@ -1,4 +1,4 @@
-"""Construction-time feature selection; default stays the reviewed baseline."""
+"""Construction-time selection; conservative offline integration by default."""
 from __future__ import annotations
 
 import os
@@ -7,12 +7,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CoreConfig:
-    mode: str = "baseline"
+    mode: str = "integrated"
     retrieval: str = "baseline"
 
     @classmethod
     def from_environment(cls) -> "CoreConfig":
-        mode = os.environ.get("INTENTCOMPASS_AGENT_MODE", "baseline").strip().lower()
+        mode = os.environ.get("INTENTCOMPASS_AGENT_MODE", "integrated").strip().lower()
         retrieval = os.environ.get("INTENTCOMPASS_RETRIEVAL", "baseline").strip().lower()
         if mode not in {"baseline", "adaptive", "integrated"}:
             raise ValueError("INTENTCOMPASS_AGENT_MODE must be baseline, adaptive or integrated")

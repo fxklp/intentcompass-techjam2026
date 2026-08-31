@@ -81,6 +81,15 @@ class HybridTest(unittest.TestCase):
         retriever = self.make_hybrid(Mock(ids=["A","B","ALIEN"]))
         self.assertIsNone(retriever.dense)
 
+    def test_category_storage_shared_without_changing_values(self):
+        retriever = BaselineFTS5Retriever(self.catalog)
+        self.addCleanup(retriever.close)
+        first = retriever.index.products["A"]
+        second = retriever.index.products["B"]
+        self.assertEqual(first.categories, ("shoes",))
+        self.assertIs(first.categories[0], second.categories[0])
+        self.assertFalse(hasattr(first, "__dict__"))
+
     def test_artifact_hash_tamper_rejected_before_model_load(self):
         directory = self.directory / "model"
         for name in MODEL_FILES:
