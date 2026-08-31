@@ -17,6 +17,7 @@ from solution.state import SessionState
 from solution.semantic import MAX_CANDIDATES
 from solution.chat_reranker import make_reranker
 from solution.workflow import WorkflowState
+from solution.api_demand import DemandState
 
 
 @dataclass
@@ -24,6 +25,7 @@ class AdaptiveSession:
     memory: ContextMemory
     workflow: WorkflowState = field(default_factory=WorkflowState)
     last_trace: dict = field(default_factory=dict)
+    demand: DemandState = field(default_factory=DemandState)
 
 
 class AdaptiveController:
@@ -71,7 +73,7 @@ class AdaptiveController:
         candidates = [Candidate(item.parent_asin, item.retrieval_rank, item.retrieval_score, item.searchable_text, item.price) for item in result.candidates]
         # Popularity fallback is a compatibility promise: do not reinterpret
         # metadata from a no-match pool as query relevance or profile evidence.
-        ranking_limit = max(output_limit, MAX_CANDIDATES) if self.semantic.enabled else output_limit
+        ranking_limit = max(output_limit, getattr(self.semantic, "candidate_limit", MAX_CANDIDATES)) if self.semantic.enabled else output_limit
         ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
             candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
         )
@@ -79,7 +81,10 @@ class AdaptiveController:
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
         if not result.trace.fallback_used and output_limit > 0 and not cutoff:
-            semantic_result = self.semantic.rerank(ranked, context)
+            if getattr(self.semantic, "demand_variant", "legacy") != "legacy":
+                semantic_result = session.demand.rerank(self.semantic, ranked, context)
+            else:
+                semantic_result = self.semantic.rerank(ranked, context)
             ranked = semantic_result.candidates
         ranked = ranked[:output_limit]
         if self.mode == "integrated":

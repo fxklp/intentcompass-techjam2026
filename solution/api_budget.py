@@ -54,9 +54,11 @@ class BudgetLedger:
                 db.execute("INSERT INTO provider_limits VALUES (?,?) ON CONFLICT(provider) DO UPDATE SET cap=excluded.cap", (provider, amount))
             db.execute("UPDATE policy SET cap=? WHERE id=1", (cap,))
 
-    def reserve(self, model: str, maximum_micro_rmb: int) -> str:
+    def reserve(self, model: str, maximum_micro_rmb: int, *, ceiling_micro_rmb: int | None = None) -> str:
         if type(maximum_micro_rmb) is not int or maximum_micro_rmb <= 0:
             raise BudgetUnavailable("invalid cost reservation")
+        if ceiling_micro_rmb is not None and (type(ceiling_micro_rmb) is not int or not 0 < ceiling_micro_rmb <= CAP_MICRO_RMB):
+            raise BudgetUnavailable("invalid run ceiling")
         identifier = uuid.uuid4().hex
         with closing(sqlite3.connect(self.path, timeout=3)) as db, db:
             db.execute("BEGIN IMMEDIATE")
@@ -64,6 +66,8 @@ class BudgetLedger:
             if policy is None or policy[1] != 0 or not 0 < policy[0] <= CAP_MICRO_RMB:
                 raise BudgetUnavailable("budget policy invalid or circuit blocked")
             used = db.execute("SELECT COALESCE(SUM(charged),0) FROM calls").fetchone()[0]
+            if ceiling_micro_rmb is not None and used + maximum_micro_rmb > ceiling_micro_rmb:
+                raise BudgetUnavailable("run spending ceiling would be exceeded")
             if used + maximum_micro_rmb > policy[0]:
                 raise BudgetUnavailable("experiment budget would be exceeded")
             if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='provider_limits'").fetchone():
