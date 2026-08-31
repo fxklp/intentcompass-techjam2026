@@ -116,7 +116,7 @@ class ChatTest(unittest.TestCase):
         self.assertEqual(BudgetLedger(self.path).summary()["groups"][0]["status"], "reserved")
 
     def test_no_opt_in_key_region_ledger_or_budget_no_network(self):
-        for env in ({"INTENTCOMPASS_LLM_ALLOW_NETWORK":"0"}, {"DASHSCOPE_API_KEY":""}, {"INTENTCOMPASS_QWEN_REGION":"singapore"}, {"INTENTCOMPASS_BUDGET_LEDGER":""}, {"INTENTCOMPASS_LLM_MODEL":"unpriced"}):
+        for env in ({"INTENTCOMPASS_LLM_ALLOW_NETWORK":"0"}, {"DASHSCOPE_API_KEY":""}, {"INTENTCOMPASS_QWEN_REGION":"unconfirmed"}, {"INTENTCOMPASS_BUDGET_LEDGER":""}, {"INTENTCOMPASS_LLM_MODEL":"unpriced"}):
             with self.subTest(env=env), patch.dict(os.environ, env), patch("solution.chat_reranker.chat_post") as transport:
                 result = BudgetedChatReranker().rerank(POOL, {})
                 self.assertFalse(result.attempted)

@@ -33,6 +33,27 @@ class BudgetLedger:
             db.execute("INSERT INTO policy VALUES (1, ?, 0)", (CAP_MICRO_RMB,))
             db.execute("CREATE TABLE calls (id TEXT PRIMARY KEY, model TEXT NOT NULL, reserved INTEGER NOT NULL CHECK(reserved>=0), charged INTEGER NOT NULL CHECK(charged>=0), status TEXT NOT NULL, prompt_tokens INTEGER, completion_tokens INTEGER)")
 
+    def restrict(self, cap: int, provider_caps: dict[str, int]) -> None:
+        """Lower ceilings in the SAME ledger, without clearing previous charges."""
+        if (type(cap) is not int or not 0 < cap <= CAP_MICRO_RMB
+                or set(provider_caps) != {"qwen", "deepseek"}
+                or any(type(v) is not int or not 0 < v <= cap for v in provider_caps.values())):
+            raise BudgetUnavailable("invalid restricted budget")
+        with closing(sqlite3.connect(self.path, timeout=3)) as db, db:
+            db.execute("BEGIN IMMEDIATE")
+            old_cap, blocked = db.execute("SELECT cap, blocked FROM policy WHERE id=1").fetchone()
+            used = db.execute("SELECT COALESCE(SUM(charged),0) FROM calls").fetchone()[0]
+            if blocked or not used <= cap <= old_cap <= CAP_MICRO_RMB:
+                raise BudgetUnavailable("cannot raise or invalidate existing budget")
+            db.execute("CREATE TABLE IF NOT EXISTS provider_limits (provider TEXT PRIMARY KEY, cap INTEGER NOT NULL CHECK(cap>0))")
+            for provider, amount in provider_caps.items():
+                old = db.execute("SELECT cap FROM provider_limits WHERE provider=?", (provider,)).fetchone()
+                spent = db.execute("SELECT COALESCE(SUM(charged),0) FROM calls WHERE model LIKE ?", (provider + "%",)).fetchone()[0]
+                if amount < spent or (old and amount > old[0]):
+                    raise BudgetUnavailable("cannot raise or invalidate provider budget")
+                db.execute("INSERT INTO provider_limits VALUES (?,?) ON CONFLICT(provider) DO UPDATE SET cap=excluded.cap", (provider, amount))
+            db.execute("UPDATE policy SET cap=? WHERE id=1", (cap,))
+
     def reserve(self, model: str, maximum_micro_rmb: int) -> str:
         if type(maximum_micro_rmb) is not int or maximum_micro_rmb <= 0:
             raise BudgetUnavailable("invalid cost reservation")
@@ -40,11 +61,17 @@ class BudgetLedger:
         with closing(sqlite3.connect(self.path, timeout=3)) as db, db:
             db.execute("BEGIN IMMEDIATE")
             policy = db.execute("SELECT cap, blocked FROM policy WHERE id=1").fetchone()
-            if policy != (CAP_MICRO_RMB, 0):
+            if policy is None or policy[1] != 0 or not 0 < policy[0] <= CAP_MICRO_RMB:
                 raise BudgetUnavailable("budget policy invalid or circuit blocked")
             used = db.execute("SELECT COALESCE(SUM(charged),0) FROM calls").fetchone()[0]
-            if used + maximum_micro_rmb > CAP_MICRO_RMB:
-                raise BudgetUnavailable("RMB100 experiment budget would be exceeded")
+            if used + maximum_micro_rmb > policy[0]:
+                raise BudgetUnavailable("experiment budget would be exceeded")
+            if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='provider_limits'").fetchone():
+                provider = next((name for name in ("qwen", "deepseek") if model.startswith(name)), None)
+                limit = db.execute("SELECT cap FROM provider_limits WHERE provider=?", (provider,)).fetchone()
+                spent = db.execute("SELECT COALESCE(SUM(charged),0) FROM calls WHERE model LIKE ?", ((provider or "") + "%",)).fetchone()[0]
+                if limit is None or spent + maximum_micro_rmb > limit[0]:
+                    raise BudgetUnavailable("provider budget would be exceeded")
             db.execute("INSERT INTO calls VALUES (?, ?, ?, ?, 'reserved', NULL, NULL)", (identifier, model, maximum_micro_rmb, maximum_micro_rmb))
         return identifier
 
@@ -68,4 +95,5 @@ class BudgetLedger:
         with closing(sqlite3.connect(self.path)) as db:
             cap, blocked = db.execute("SELECT cap, blocked FROM policy WHERE id=1").fetchone()
             rows = db.execute("SELECT model, status, COUNT(*), SUM(charged), SUM(prompt_tokens), SUM(completion_tokens) FROM calls GROUP BY model, status ORDER BY model,status").fetchall()
-        return {"cap_rmb": cap/1e6, "blocked": bool(blocked), "conservative_cost_rmb": sum(row[3] for row in rows)/1e6, "groups": [{"model": row[0], "status": row[1], "calls": row[2], "cost_bound_rmb": row[3]/1e6, "prompt_tokens": row[4], "completion_tokens": row[5]} for row in rows], "note": "Peak uncached rates; credits/discounts not subtracted. Reserved unknown calls may still be billed."}
+            limits = dict(db.execute("SELECT provider, cap FROM provider_limits")) if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='provider_limits'").fetchone() else {}
+        return {"cap_rmb": cap/1e6, "provider_caps_rmb": {name: value/1e6 for name, value in limits.items()}, "blocked": bool(blocked), "conservative_cost_rmb": sum(row[3] for row in rows)/1e6, "groups": [{"model": row[0], "status": row[1], "calls": row[2], "cost_bound_rmb": row[3]/1e6, "prompt_tokens": row[4], "completion_tokens": row[5]} for row in rows], "note": "Peak uncached rates; credits/discounts not subtracted. Reserved unknown calls may still be billed."}

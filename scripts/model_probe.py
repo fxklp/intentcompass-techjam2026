@@ -15,7 +15,11 @@ if str(ROOT) not in sys.path:
 
 from solution.api_budget import BudgetLedger
 from solution.chat_reranker import RATES
-from tests.core.check_adaptive import sha256, write_json
+from tests.core.check_adaptive import non_regression, sha256, write_json
+
+
+class LiveScreenAborted(BaseException):
+    """Escape the official evaluator's per-turn Exception handler unchanged."""
 
 
 class ProbeAgent:
@@ -37,7 +41,7 @@ class ProbeAgent:
         # Abort a live screen after provider failure; do not call a fallback-only
         # evaluation a model experiment, and do not retry in another Agent.
         if trace["attempted"] and trace["reason"] != "model_ranked":
-            raise RuntimeError("live model screen failed; inspect sanitized summary and budget")
+            raise LiveScreenAborted("live model screen failed; inspect sanitized summary and budget")
         return result
 
 
@@ -49,7 +53,15 @@ def main():
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--per-scenario", type=int, default=3)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--credentials-file", type=Path)
+    parser.add_argument("--output-format", choices=("ids", "indices"), default="ids")
     args = parser.parse_args()
+    if args.credentials_file:
+        from scripts.api_credentials import load_credentials
+        try:
+            load_credentials(args.credentials_file)
+        except (ValueError, OSError):
+            parser.error("credential file invalid; contents suppressed; no request sent")
     if args.initialize_budget:
         BudgetLedger.initialize(args.ledger.resolve())
     ledger = BudgetLedger(args.ledger.resolve())
@@ -59,7 +71,7 @@ def main():
     if not args.live:
         print(json.dumps(readiness, indent=2))
         return
-    if not readiness["credential_present"] or (provider == "qwen" and readiness["qwen_region"] != "beijing"):
+    if not readiness["credential_present"] or (provider == "qwen" and readiness["qwen_region"] not in {"beijing", "singapore"}):
         parser.error("credentials and verified region required; no request sent")
     if not 1 <= args.per_scenario <= 80 or args.output is None:
         parser.error("live screen requires --output and per-scenario 1..80")
@@ -68,6 +80,7 @@ def main():
         parser.error("new output must be under reports/generated")
     output.parent.mkdir(parents=True, exist_ok=True)
     os.environ.update(INTENTCOMPASS_AGENT_MODE="integrated", INTENTCOMPASS_RETRIEVAL="baseline", INTENTCOMPASS_SEMANTIC=provider, INTENTCOMPASS_LLM_MODEL=args.model, INTENTCOMPASS_LLM_ALLOW_NETWORK="1", INTENTCOMPASS_BUDGET_LEDGER=str(args.ledger.resolve()))
+    os.environ["INTENTCOMPASS_LLM_OUTPUT_FORMAT"] = args.output_format
     from evaluator.local_evaluator import catalog_index, evaluate, load_jsonl
     from scripts.benchmark_runtime import percentile
     from tests.core.check_final import inventory
@@ -79,6 +92,16 @@ def main():
             selected.append(sample)
             counts[scenario] += 1
     ids, categories, products = catalog_index(ROOT / "data/catalog.jsonl")
+    os.environ.update(INTENTCOMPASS_SEMANTIC="off", INTENTCOMPASS_LLM_ALLOW_NETWORK="0")
+    reference = ProbeAgent(ROOT / "data/catalog.jsonl")
+    try:
+        baseline = evaluate(reference, selected, ids, categories, products)
+        baseline.pop("sessions", None)
+    finally:
+        reference.agent.close()
+    baseline_p95 = percentile(reference.latencies, .95)
+    os.environ.update(INTENTCOMPASS_SEMANTIC=provider, INTENTCOMPASS_LLM_ALLOW_NETWORK="1")
+    budget_before = ledger.summary()
     agent = ProbeAgent(ROOT / "data/catalog.jsonl")
     metrics, status = None, "completed"
     try:
@@ -86,11 +109,12 @@ def main():
         metrics.pop("sessions", None)
         if agent.semantic_reasons["model_ranked"] == 0:
             status = "no_successful_model_calls"
-    except RuntimeError:
+    except LiveScreenAborted:
         status = "provider_failed_screen_aborted"
     finally:
         agent.agent.close()
-    result = {"model": args.model, "provider": provider, "status": status, "sample_selection": "first N public sessions per scenario; fixed before calls", "sample_counts": dict(counts), "metrics": metrics, "semantic_reasons": dict(agent.semantic_reasons), "latency_p95_ms": percentile(agent.latencies, .95) if agent.latencies else None, "budget": ledger.summary(), "source_sha256": before, "sources_unchanged": before == inventory(), "limitations": ["Only current public candidate text and safe context sent; no private or Shadow data", "Cost is conservative uncached peak estimate, not a provider invoice", "A small screen cannot establish final quality or private performance"]}
+    result = {"model": args.model, "provider": provider, "qwen_region": readiness["qwen_region"] if provider == "qwen" else None, "status": status, "sample_selection": "first N public sessions per scenario; fixed before calls", "sample_counts": dict(counts), "metrics": metrics, "baseline_metrics": baseline, "quality_regressions": non_regression(baseline, metrics) if metrics else None, "baseline_latency_p95_ms": baseline_p95, "semantic_reasons": dict(agent.semantic_reasons), "provider_failure": agent.agent._core._adaptive.semantic.last_failure, "latency_p95_ms": percentile(agent.latencies, .95) if agent.latencies else None, "budget_before": budget_before, "budget": ledger.summary(), "source_sha256": before, "sources_unchanged": before == inventory(), "limitations": ["Only current public candidate text and safe context sent; no private or Shadow data", "Cost is conservative uncached peak estimate, not a provider invoice", "A small screen cannot establish final quality or private performance"]}
+    result["output_format"] = args.output_format
     write_json(output, result)
     print(json.dumps({key: value for key, value in result.items() if key != "source_sha256"}, indent=2))
     print("output_sha256=" + sha256(output))
