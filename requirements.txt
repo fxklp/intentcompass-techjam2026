@@ -1,0 +1,3 @@
+# Default IntentCompass runtime uses only the Python standard library.
+# Python 3.12 or 3.13 with SQLite FTS5 is recommended.
+# Do not install requirements-semantic.txt for the default release.

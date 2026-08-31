@@ -1,0 +1,98 @@
+{
+  "baseline": {
+    "mode": "baseline",
+    "process_id": 43544,
+    "iterations": 20,
+    "cold_start_seconds": 3.168223,
+    "retrieval_ms_mean": 15.080747,
+    "retrieval_ms_p50": 14.5054,
+    "retrieval_ms_p95": 26.0452,
+    "peak_rss_bytes": 265293824,
+    "deterministic_top10_samples": [
+      [
+        "B08JKBXWT1",
+        "B07MM8XR7W",
+        "B07FBQ9652",
+        "B01LL0ORYM",
+        "B01MZ1V690",
+        "B07RW7WZT2",
+        "B08GS2TN8X",
+        "B011CIW1OQ",
+        "B08S7GZ8BT",
+        "B088QL39Q2"
+      ],
+      [
+        "B095J61VF7",
+        "B09FLD6GBZ",
+        "B093WHGPCW",
+        "B00DC2BTZS",
+        "B0725QQXSQ",
+        "B07JDRDVYZ",
+        "B00GNJX4BE",
+        "B08LPS431B",
+        "B08BYHLBF7",
+        "B079Z9LDNZ"
+      ],
+      [
+        "B07GJ9TJ9Z",
+        "B08P58ZXLR",
+        "B08BGCPGBG",
+        "B08MDRTL62",
+        "B09BZPRJTQ",
+        "B00G2G6R9E",
+        "B08P5G5NK8",
+        "B09K45CY6K",
+        "B0B2W6CY5F",
+        "B073XTGY2T"
+      ]
+    ]
+  },
+  "candidate": {
+    "mode": "candidate",
+    "process_id": 35728,
+    "iterations": 20,
+    "cold_start_seconds": 2.790247,
+    "retrieval_ms_mean": 62.475797,
+    "retrieval_ms_p50": 50.1752,
+    "retrieval_ms_p95": 121.7949,
+    "peak_rss_bytes": 265326592,
+    "deterministic_top10_samples": [
+      [
+        "B08JKBXWT1",
+        "B07MM8XR7W",
+        "B088QL39Q2",
+        "B07FBQ9652",
+        "B01LL0ORYM",
+        "B01MZ1V690",
+        "B08F211ZLL",
+        "B07RW7WZT2",
+        "B08GS2TN8X",
+        "B08S7GZ8BT"
+      ],
+      [
+        "B00DC2BTZS",
+        "B095J61VF7",
+        "B07JDRDVYZ",
+        "B09FLD6GBZ",
+        "B08LPS431B",
+        "B093WHGPCW",
+        "B0725QQXSQ",
+        "B0170P0174",
+        "B00GNJX4BE",
+        "B06XWGFDJ9"
+      ],
+      [
+        "B07GJ9TJ9Z",
+        "B011O8L190",
+        "B073XTGY2T",
+        "B08MDRTL62",
+        "B08P58ZXLR",
+        "B08BGCPGBG",
+        "B09K45CY6K",
+        "B09BZPRJTQ",
+        "B00G2G6R9E",
+        "B08P5G5NK8"
+      ]
+    ]
+  }
+}

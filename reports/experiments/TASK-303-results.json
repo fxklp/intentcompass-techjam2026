@@ -1,0 +1,4621 @@
+{
+  "schema_version": 1,
+  "task": "TASK-303-dual-route-inmemory",
+  "code_commit": "0be74958a9833e1c6e2e0bd5a8db9abdc9c6ebcd",
+  "environment": {
+    "python": "3.14.5",
+    "platform": "win32"
+  },
+  "catalog": {
+    "sha256": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+    "input_bytes": 60546327,
+    "generated_asset_bytes": 0
+  },
+  "dense_retrieval": {
+    "implemented": false,
+    "reason": "No vetted embedding asset was required for this lightweight experiment."
+  },
+  "offline_command": "python experiments/retrieval/evaluate.py --catalog <catalog.jsonl> --output reports/experiments/TASK-303-results.json",
+  "runs": {
+    "baseline_public": {
+      "mode": "baseline",
+      "dataset": "public",
+      "metrics": {
+        "sample_count": 200,
+        "hit_rate_at_10": 0.91,
+        "mrr": 0.624024,
+        "mttc": 4.255,
+        "efficiency": 0.6745,
+        "recommended_technical_score": 0.777107,
+        "reported_token_usage": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "scenario_metrics": {
+          "boundary": {
+            "sample_count": 10,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.611667,
+            "mttc": 6.0,
+            "efficiency": 0.5,
+            "recommended_technical_score": 0.7335
+          },
+          "browsing": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.95,
+            "mrr": 0.677808,
+            "mttc": 3.0625,
+            "efficiency": 0.79375,
+            "recommended_technical_score": 0.837092
+          },
+          "buying": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.925,
+            "mrr": 0.613323,
+            "mttc": 4.275,
+            "efficiency": 0.6725,
+            "recommended_technical_score": 0.780997
+          },
+          "intent_override": {
+            "sample_count": 30,
+            "hit_rate_at_10": 0.766667,
+            "mrr": 0.513254,
+            "mttc": 6.8,
+            "efficiency": 0.42,
+            "recommended_technical_score": 0.62131
+          }
+        }
+      },
+      "candidate_recall": {
+        "pool_size": 50,
+        "session_first_turn_recall": 0.38,
+        "session_any_turn_recall": 0.955,
+        "turn_level_recall": 0.537815,
+        "observed_turns": 833
+      },
+      "performance": {
+        "cold_start_seconds": 2.424861,
+        "retrieval_calls": 833,
+        "retrieval_ms_p50": 18.9398,
+        "retrieval_ms_p95": 44.082,
+        "respond_ms_p50": 21.086,
+        "respond_ms_p95": 47.1089,
+        "retrieval_ms_mean": 19.887849,
+        "peak_rss_bytes": 466792448
+      },
+      "trace_examples": [
+        {
+          "sample_id": "public_0001",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "key",
+                  "requirement",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy",
+                  "triple",
+                  "moon",
+                  "pentagram",
+                  "symbol",
+                  "represents",
+                  "phases",
+                  "which",
+                  "linked",
+                  "three",
+                  "aspects",
+                  "goddess",
+                  "life",
+                  "women",
+                  "representing",
+                  "holistic"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0002",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "buckle",
+                  "closure",
+                  "leather",
+                  "100"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 10,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0003",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "stainless",
+                  "steel",
+                  "band"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "stainless",
+                  "steel",
+                  "band"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant",
+                  "year",
+                  "battery",
+                  "day",
+                  "date",
+                  "indicator"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0004",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0005",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "outdoor",
+                  "work",
+                  "snow",
+                  "cold",
+                  "weather",
+                  "key",
+                  "requirement",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "outdoor",
+                  "work",
+                  "snow",
+                  "cold",
+                  "weather",
+                  "leather",
+                  "rubber",
+                  "sole",
+                  "shaft",
+                  "measures",
+                  "approximately",
+                  "37",
+                  "arch"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0006",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "basketball",
+                  "men",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "basketball",
+                  "men",
+                  "drawstring",
+                  "closure",
+                  "high",
+                  "quality",
+                  "mesh",
+                  "maximum",
+                  "breathability",
+                  "keep",
+                  "cool"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0007",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "imported",
+                  "pull",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "imported",
+                  "pull",
+                  "closure",
+                  "polyester",
+                  "75",
+                  "20",
+                  "rayon",
+                  "spandex"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0008",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "key",
+                  "requirement",
+                  "nylon"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "96",
+                  "nylon",
+                  "spandex",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "candidate_public": {
+      "mode": "candidate",
+      "dataset": "public",
+      "metrics": {
+        "sample_count": 200,
+        "hit_rate_at_10": 0.91,
+        "mrr": 0.619054,
+        "mttc": 4.16,
+        "efficiency": 0.684,
+        "recommended_technical_score": 0.777516,
+        "reported_token_usage": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "scenario_metrics": {
+          "boundary": {
+            "sample_count": 10,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.611667,
+            "mttc": 6.0,
+            "efficiency": 0.5,
+            "recommended_technical_score": 0.7335
+          },
+          "browsing": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.9625,
+            "mrr": 0.672951,
+            "mttc": 2.875,
+            "efficiency": 0.8125,
+            "recommended_technical_score": 0.845635
+          },
+          "buying": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.9125,
+            "mrr": 0.611483,
+            "mttc": 4.225,
+            "efficiency": 0.6775,
+            "recommended_technical_score": 0.775195
+          },
+          "intent_override": {
+            "sample_count": 30,
+            "hit_rate_at_10": 0.766667,
+            "mrr": 0.497976,
+            "mttc": 6.8,
+            "efficiency": 0.42,
+            "recommended_technical_score": 0.616726
+          }
+        }
+      },
+      "candidate_recall": {
+        "pool_size": 50,
+        "session_first_turn_recall": 0.38,
+        "session_any_turn_recall": 0.955,
+        "turn_level_recall": 0.527027,
+        "observed_turns": 814
+      },
+      "performance": {
+        "cold_start_seconds": 2.596176,
+        "retrieval_calls": 814,
+        "retrieval_ms_p50": 28.4133,
+        "retrieval_ms_p95": 81.1882,
+        "respond_ms_p50": 31.1734,
+        "respond_ms_p95": 86.0446,
+        "retrieval_ms_mean": 36.636371,
+        "peak_rss_bytes": 466034688
+      },
+      "trace_examples": [
+        {
+          "sample_id": "public_0001",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "key",
+                  "requirement",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "necklaces",
+                  "material",
+                  "alloy",
+                  "triple",
+                  "moon",
+                  "pentagram",
+                  "symbol",
+                  "represents",
+                  "phases",
+                  "which",
+                  "linked",
+                  "three",
+                  "aspects",
+                  "goddess",
+                  "life",
+                  "women",
+                  "representing",
+                  "holistic"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0002",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "buckle",
+                  "closure",
+                  "leather",
+                  "100"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 10,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "accessories",
+                  "belts",
+                  "leather",
+                  "imported",
+                  "buckle",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0003",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "stainless",
+                  "steel",
+                  "band"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "stainless",
+                  "steel",
+                  "band"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,size"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 3,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "watches",
+                  "wrist",
+                  "water",
+                  "resistant",
+                  "year",
+                  "battery",
+                  "day",
+                  "date",
+                  "indicator"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0004",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:style"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:style"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material,style"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tops",
+                  "tees",
+                  "tanks",
+                  "camis",
+                  "polyester",
+                  "long",
+                  "torso",
+                  "camisole",
+                  "extra",
+                  "coverage",
+                  "spagetti",
+                  "adjustable",
+                  "strap",
+                  "perfect",
+                  "fit"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0005",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "outdoor",
+                  "work",
+                  "snow",
+                  "cold",
+                  "weather",
+                  "key",
+                  "requirement",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material,size"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 11,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "outdoor",
+                  "work",
+                  "snow",
+                  "cold",
+                  "weather",
+                  "leather",
+                  "rubber",
+                  "sole",
+                  "shaft",
+                  "measures",
+                  "approximately",
+                  "37",
+                  "arch"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0006",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "browsing",
+                "reason_codes": [
+                  "category_without_hard_constraint"
+                ],
+                "routes": [
+                  "category_fields",
+                  "baseline_fts",
+                  "expanded_fts"
+                ],
+                "route_candidate_counts": {
+                  "category_fields": 100,
+                  "baseline_fts": 100,
+                  "expanded_fts": 100
+                },
+                "query_terms": [
+                  "basketball",
+                  "men",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "basketball",
+                  "men",
+                  "drawstring",
+                  "closure",
+                  "high",
+                  "quality",
+                  "mesh",
+                  "maximum",
+                  "breathability",
+                  "keep",
+                  "cool"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0007",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "browsing",
+                "reason_codes": [
+                  "category_without_hard_constraint"
+                ],
+                "routes": [
+                  "category_fields",
+                  "baseline_fts",
+                  "expanded_fts"
+                ],
+                "route_candidate_counts": {
+                  "category_fields": 100,
+                  "baseline_fts": 100,
+                  "expanded_fts": 100
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "imported",
+                  "pull",
+                  "closure"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 3,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tees",
+                  "blouses",
+                  "tunics",
+                  "imported",
+                  "pull",
+                  "closure",
+                  "polyester",
+                  "75",
+                  "20",
+                  "rayon",
+                  "spandex"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "public_0008",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "key",
+                  "requirement",
+                  "nylon"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "nylon",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 3,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "bras",
+                  "everyday",
+                  "96",
+                  "nylon",
+                  "spandex",
+                  "pull",
+                  "closure",
+                  "hand",
+                  "wash",
+                  "only"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "baseline_shadow": {
+      "mode": "baseline",
+      "dataset": "shadow",
+      "metrics": {
+        "sample_count": 200,
+        "hit_rate_at_10": 0.895,
+        "mrr": 0.630488,
+        "mttc": 3.805,
+        "efficiency": 0.7195,
+        "recommended_technical_score": 0.780546,
+        "reported_token_usage": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "scenario_metrics": {
+          "boundary": {
+            "sample_count": 10,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.708333,
+            "mttc": 4.9,
+            "efficiency": 0.61,
+            "recommended_technical_score": 0.7845
+          },
+          "browsing": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.697187,
+            "mttc": 3.4,
+            "efficiency": 0.76,
+            "recommended_technical_score": 0.811156
+          },
+          "buying": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.9125,
+            "mrr": 0.570372,
+            "mttc": 2.975,
+            "efficiency": 0.8025,
+            "recommended_technical_score": 0.787862
+          },
+          "intent_override": {
+            "sample_count": 30,
+            "hit_rate_at_10": 0.833333,
+            "mrr": 0.586984,
+            "mttc": 6.733333,
+            "efficiency": 0.426667,
+            "recommended_technical_score": 0.678095
+          }
+        }
+      },
+      "candidate_recall": {
+        "pool_size": 50,
+        "session_first_turn_recall": 0.455,
+        "session_any_turn_recall": 0.96,
+        "turn_level_recall": 0.601351,
+        "observed_turns": 740
+      },
+      "performance": {
+        "cold_start_seconds": 2.592278,
+        "retrieval_calls": 740,
+        "retrieval_ms_p50": 24.0969,
+        "retrieval_ms_p95": 53.5013,
+        "respond_ms_p50": 26.3782,
+        "respond_ms_p95": 56.5077,
+        "retrieval_ms_mean": 26.377832,
+        "peak_rss_bytes": 467042304
+      },
+      "trace_examples": [
+        {
+          "sample_id": "shadow_0001",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "footies",
+                  "rompers",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "footies",
+                  "rompers",
+                  "zipper",
+                  "closure",
+                  "package",
+                  "dimensions",
+                  "48",
+                  "21",
+                  "89",
+                  "inches",
+                  "ounces"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0002",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "backpacks",
+                  "kids",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0003",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "key",
+                  "requirement",
+                  "synthetic",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "synthetic",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "synthetic",
+                  "sole",
+                  "color",
+                  "black"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0004",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 10,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0005",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "athletic",
+                  "golf",
+                  "key",
+                  "requirement",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "athletic",
+                  "golf",
+                  "leather",
+                  "made",
+                  "usa",
+                  "imported",
+                  "synthetic",
+                  "rubber",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0006",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "athletic",
+                  "soccer",
+                  "key",
+                  "requirement",
+                  "100",
+                  "synthetic"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0007",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tees",
+                  "shirts",
+                  "button",
+                  "down",
+                  "key",
+                  "requirement",
+                  "cotton"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "tees",
+                  "shirts",
+                  "button",
+                  "down",
+                  "cotton",
+                  "imported",
+                  "machine",
+                  "wash"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0008",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "baseline",
+                "reason_codes": [
+                  "compatibility_fallback"
+                ],
+                "routes": [
+                  "baseline_fts"
+                ],
+                "route_candidate_counts": {
+                  "baseline_fts": 50
+                },
+                "query_terms": [
+                  "jewelry",
+                  "pendants",
+                  "coins",
+                  "key",
+                  "requirement",
+                  "made",
+                  "usa",
+                  "imported"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "candidate_shadow": {
+      "mode": "candidate",
+      "dataset": "shadow",
+      "metrics": {
+        "sample_count": 200,
+        "hit_rate_at_10": 0.9,
+        "mrr": 0.615097,
+        "mttc": 3.71,
+        "efficiency": 0.729,
+        "recommended_technical_score": 0.780329,
+        "reported_token_usage": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "scenario_metrics": {
+          "boundary": {
+            "sample_count": 10,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.7,
+            "mttc": 4.8,
+            "efficiency": 0.62,
+            "recommended_technical_score": 0.784
+          },
+          "browsing": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.9,
+            "mrr": 0.680188,
+            "mttc": 3.4,
+            "efficiency": 0.76,
+            "recommended_technical_score": 0.806056
+          },
+          "buying": {
+            "sample_count": 80,
+            "hit_rate_at_10": 0.925,
+            "mrr": 0.555526,
+            "mttc": 2.8125,
+            "efficiency": 0.81875,
+            "recommended_technical_score": 0.792908
+          },
+          "intent_override": {
+            "sample_count": 30,
+            "hit_rate_at_10": 0.833333,
+            "mrr": 0.572077,
+            "mttc": 6.566667,
+            "efficiency": 0.443333,
+            "recommended_technical_score": 0.676956
+          }
+        }
+      },
+      "candidate_recall": {
+        "pool_size": 50,
+        "session_first_turn_recall": 0.455,
+        "session_any_turn_recall": 0.96,
+        "turn_level_recall": 0.591413,
+        "observed_turns": 722
+      },
+      "performance": {
+        "cold_start_seconds": 2.529682,
+        "retrieval_calls": 722,
+        "retrieval_ms_p50": 34.596,
+        "retrieval_ms_p95": 81.1519,
+        "respond_ms_p50": 36.4468,
+        "respond_ms_p95": 83.0031,
+        "retrieval_ms_mean": 39.564823,
+        "peak_rss_bytes": 467148800
+      },
+      "trace_examples": [
+        {
+          "sample_id": "shadow_0001",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "browsing",
+                "reason_codes": [
+                  "category_without_hard_constraint"
+                ],
+                "routes": [
+                  "category_fields",
+                  "baseline_fts",
+                  "expanded_fts"
+                ],
+                "route_candidate_counts": {
+                  "category_fields": 100,
+                  "baseline_fts": 100,
+                  "expanded_fts": 100
+                },
+                "query_terms": [
+                  "footies",
+                  "rompers",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,size"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 1,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "footies",
+                  "rompers",
+                  "zipper",
+                  "closure",
+                  "package",
+                  "dimensions",
+                  "48",
+                  "21",
+                  "89",
+                  "inches",
+                  "ounces"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0002",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "browsing",
+                "reason_codes": [
+                  "category_without_hard_constraint"
+                ],
+                "routes": [
+                  "category_fields",
+                  "baseline_fts",
+                  "expanded_fts"
+                ],
+                "route_candidate_counts": {
+                  "category_fields": 100,
+                  "baseline_fts": 100,
+                  "expanded_fts": 100
+                },
+                "query_terms": [
+                  "backpacks",
+                  "kids",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0003",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "key",
+                  "requirement",
+                  "synthetic",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "synthetic",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 62,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shoes",
+                  "boots",
+                  "synthetic",
+                  "sole",
+                  "color",
+                  "black"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0004",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "browsing",
+                "reason_codes": [
+                  "category_without_hard_constraint"
+                ],
+                "routes": [
+                  "category_fields",
+                  "baseline_fts",
+                  "expanded_fts"
+                ],
+                "route_candidate_counts": {
+                  "category_fields": 100,
+                  "baseline_fts": 100,
+                  "expanded_fts": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "still",
+                  "exploring"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 3,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 4,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 5,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 6,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 7,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 8,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 9,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 10,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:color,feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "shirts",
+                  "imported",
+                  "cotton",
+                  "solid",
+                  "colors",
+                  "100",
+                  "heather",
+                  "grey",
+                  "90",
+                  "10",
+                  "polyester",
+                  "all",
+                  "other",
+                  "heathers",
+                  "50",
+                  "color"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0005",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "athletic",
+                  "golf",
+                  "key",
+                  "requirement",
+                  "leather"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            },
+            {
+              "turn": 2,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature,material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 28,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "athletic",
+                  "golf",
+                  "leather",
+                  "made",
+                  "usa",
+                  "imported",
+                  "synthetic",
+                  "rubber",
+                  "sole"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0006",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "athletic",
+                  "soccer",
+                  "key",
+                  "requirement",
+                  "100",
+                  "synthetic"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0007",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:material"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "tees",
+                  "shirts",
+                  "button",
+                  "down",
+                  "key",
+                  "requirement",
+                  "cotton"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        },
+        {
+          "sample_id": "shadow_0008",
+          "turns": [
+            {
+              "turn": 1,
+              "trace": {
+                "selected_path": "buying",
+                "reason_codes": [
+                  "structured_constraints_present",
+                  "attributes:feature"
+                ],
+                "routes": [
+                  "exact_constraints",
+                  "baseline_fts",
+                  "category_fields"
+                ],
+                "route_candidate_counts": {
+                  "exact_constraints": 100,
+                  "baseline_fts": 100,
+                  "category_fields": 100
+                },
+                "query_terms": [
+                  "jewelry",
+                  "pendants",
+                  "coins",
+                  "key",
+                  "requirement",
+                  "made",
+                  "usa",
+                  "imported"
+                ],
+                "expanded_terms": [],
+                "fallback_used": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "integration_thresholds": {
+    "public_hit_rate_at_10_gte_0_91": true,
+    "public_technical_score_gte_0_777107": true,
+    "shadow_hit_rate_at_10_gte_0_895": true
+  }
+}

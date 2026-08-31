@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "commit": "424781522f52e9c1ef1c814ca8dc64eaf24cfead",
+  "working_tree_dirty": false,
+  "command": "python scripts/benchmark_runtime.py",
+  "environment": {
+    "python": "3.13.9",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "network_required": false
+  },
+  "workload": {
+    "sessions": 200,
+    "respond_calls": 833,
+    "catalog_products": 50000
+  },
+  "timing": {
+    "official_harness_load_seconds": 0.581083,
+    "agent_initialization_seconds": 2.932827,
+    "evaluation_seconds": 31.512468,
+    "respond_latency_ms": {
+      "mean": 37.73562,
+      "p50": 37.5399,
+      "p95": 76.5828,
+      "p99": 112.0735,
+      "max": 145.8125
+    }
+  },
+  "official_metrics": {
+    "sample_count": 200,
+    "hit_rate_at_10": 0.91,
+    "mrr": 0.624024,
+    "mttc": 4.255,
+    "efficiency": 0.6745,
+    "recommended_technical_score": 0.777107,
+    "reported_token_usage": {
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "total_tokens": 0
+    },
+    "scenario_metrics": {
+      "boundary": {
+        "sample_count": 10,
+        "hit_rate_at_10": 0.9,
+        "mrr": 0.611667,
+        "mttc": 6.0
+      },
+      "browsing": {
+        "sample_count": 80,
+        "hit_rate_at_10": 0.95,
+        "mrr": 0.677808,
+        "mttc": 3.0625
+      },
+      "buying": {
+        "sample_count": 80,
+        "hit_rate_at_10": 0.925,
+        "mrr": 0.613323,
+        "mttc": 4.275
+      },
+      "intent_override": {
+        "sample_count": 30,
+        "hit_rate_at_10": 0.766667,
+        "mrr": 0.513254,
+        "mttc": 6.8
+      }
+    }
+  }
+}
