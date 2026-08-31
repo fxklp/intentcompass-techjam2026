@@ -9,7 +9,7 @@ from solution.retrieval.index import terms
 from solution.terminal_recovery import tokens
 
 VARIANTS = ("off", "joined", "separate")
-DEFAULT = "off"
+DEFAULT = "separate"
 
 
 def matches_all(queries: list[tuple[str, ...]], primary: str, *, separate: bool) -> bool:
