@@ -87,7 +87,7 @@ class SessionState:
             self.asked_attributes.append(attribute)
         self.last_asked_attribute = attribute
 
-    def apply_user_message(self, message: str, turn: int) -> None:
+    def apply_user_message(self, message: str, turn: int, *, flexible: bool = False) -> None:
         text = _clean(str(message))
         self.latest_turn = int(turn)
         if self.first_message is None:
@@ -95,6 +95,8 @@ class SessionState:
 
         category_match = CATEGORY_RE.search(text)
         if category_match:
+            if flexible and self.category and OVERRIDE_RE.search(text):
+                self.preferences.clear()
             self.category = _clean(category_match.group(1))
 
         if NO_PREFERENCE_RE.search(text):
@@ -127,6 +129,23 @@ class SessionState:
             self._apply_override(values, turn, replace_all=replace_all)
         elif explicit or category_match:
             self._replace_or_group(values, turn)
+        elif flexible:
+            self._apply_plain_reply(text, turn)
+
+    def _apply_plain_reply(self, text: str, turn: int) -> None:
+        """Accept ordinary slot replies without treating feedback as a preference."""
+        if re.search(r"not (?:quite |really )?right|none of|something else|still exploring", text, re.I):
+            return
+        if text.lower() in {"yes", "no", "thanks", "thank you", "ok", "okay", "..."}:
+            return
+        if self.last_asked_attribute == "category":
+            self.category = text
+            return
+        if self.last_asked_attribute:
+            self._replace_or_group(_preference_values(text), turn, self.last_asked_attribute)
+        elif re.search(r"\b(?:prefer|need|want|must|under)\b", text, re.I):
+            # A simple free-form requirement is evidence, not an inferred category.
+            self._replace_or_group(_preference_values(text), turn)
 
     def _apply_override(self, values: tuple[str, ...], turn: int, *, replace_all: bool) -> None:
         grouped = self._group_values(values)

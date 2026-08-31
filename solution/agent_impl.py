@@ -7,6 +7,7 @@ import weakref
 from pathlib import Path
 
 from solution.contracts import AgentResponse, Candidate, RetrievalRequest, flatten_text
+from solution.config import CoreConfig
 from solution.question_policy import choose_question
 from solution.ranker import rank_candidates
 from solution.state import SessionState
@@ -129,21 +130,36 @@ class Agent:
 
     def __init__(self, catalog_path: str | Path = "data/catalog.jsonl") -> None:
         self.catalog_path = Path(catalog_path)
-        self._retriever = _BaselineBM25Index(self.catalog_path)
+        config = CoreConfig.from_environment()
+        self._adaptive = None
+        if config.mode == "adaptive":
+            from solution.adaptive import AdaptiveController
+
+            self._adaptive = AdaptiveController(self.catalog_path, config)
+            self._retriever = self._adaptive.retriever
+        else:
+            self._retriever = _BaselineBM25Index(self.catalog_path)
         self._sessions: dict[str, SessionState] = {}
 
     def reset(self, session_id: str, user_profile: dict) -> None:
         normalized_id = str(session_id)
         self._sessions[normalized_id] = SessionState.create(normalized_id, user_profile)
+        if self._adaptive is not None:
+            self._adaptive.reset(normalized_id, user_profile)
 
     def close(self) -> None:
-        self._retriever.close()
+        if self._adaptive is not None:
+            self._adaptive.close()
+        else:
+            self._retriever.close()
 
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
         normalized_id = str(session_id)
         if normalized_id not in self._sessions:
             raise RuntimeError("reset must be called before respond")
         state = self._sessions[normalized_id]
+        if self._adaptive is not None:
+            return self._adaptive.respond(state, str(user_message), int(turn), int(top_k))
         state.apply_user_message(str(user_message), int(turn))
         output_limit = max(0, min(10, int(top_k)))
         request = RetrievalRequest(
