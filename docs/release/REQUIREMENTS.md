@@ -30,7 +30,7 @@ Devpost deadline; use the frozen submitted commit and unchanged final evaluator.
 | Track 4.2 feature | Actual default status |
 | --- | --- |
 | Buying/Browsing split | Rule-derived routing labels exist; separate precision/dense engines are not active. Partial. |
-| Multi-route keyword/category/vector + LLM ranking | Lexical FTS and constraint rerank active. Dense, multi-route and LLM experiments disabled. Not covered by default. |
+| Multi-route keyword/category/vector + LLM ranking | Lexical FTS, constraint rerank and within-Top10 category ordering active. Category ordering is NOT a second retrieval route. Dense, multi-route and LLM experiments disabled. Not covered by default. |
 | Information accumulation / intent replacement | Implemented in structured slots; reset/override tests and demo. |
 | Over-generality retrieval cutoff / proactive clarification | Structured state-aware questions; not a learned question policy or full lexical cutoff. Partial. |
 | Personalized context distillation | Bounded context and updated session-local profile export. No persistent cross-session model. Partial. |
@@ -68,7 +68,7 @@ No definitive total-score prediction is issued from these conflicting weights.
 Technical evidence is strongest in reproducibility and constraints/state handling;
 innovation, full pipeline coverage and real-user impact remain weaker. The old
 66/90 internal estimate is not an official score and is not upgraded because
-packaging exists. TechnicalScore .777107 is a separate benchmark composite.
+packaging exists. RC2 TechnicalScore .784520 is a separate benchmark composite.
 
 Devpost currently gives **September 1, 2026, 12:00 noon GMT+8** as the submission
 deadline, not midnight. The submitted commit is frozen then. Do not change the

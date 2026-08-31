@@ -19,10 +19,10 @@ class FieldEvidence:
             placeholders = ",".join("?" for _ in missing)
             rows = self.connection.execute(f"SELECT parent_asin, title, features, details FROM products WHERE rowid IN ({placeholders})", [self.rowids[i] for i in missing])
             fetched = {str(row[0]): " \n ".join(str(v or "") for v in row[1:]).casefold() for row in rows}
-        result = {}
-        for identifier in identifiers:
-            text = self.cache.get(identifier, fetched.get(identifier, ""))
-            result[identifier] = text
+        # Snapshot all requested hits before inserts can evict a later hit.
+        result = {identifier: self.cache.get(identifier, fetched.get(identifier, ""))
+                  for identifier in identifiers}
+        for identifier, text in result.items():
             self.cache[identifier] = text
             self.cache.move_to_end(identifier)
             while len(self.cache) > 256:

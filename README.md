@@ -5,7 +5,7 @@ replaceable preferences, searches a frozen catalog, asks structured clarificatio
 questions and returns ranked product identifiers. No UI or transaction service.
 The customer conversations are simulated, not real-user conversations.
 
-## Start here: the frozen default
+## Start here: RC2 offline default
 
 Use **Python 3.12 or 3.13 with SQLite FTS5**. No third-party Python package, GPU,
 downloaded model, API key, paid service or external database is required.
@@ -29,7 +29,9 @@ The checker rejects altered/missing payloads. The ZIP needs no Git executable;
 catalog, credentials, model assets, caches and API ledger are excluded.
 Verify its checksum against the team lead's handoff before extraction.
 
-The preset is `integrated / baseline FTS / constraints / semantic off / network off`.
+The preset is `integrated / baseline FTS / constraints / category head / semantic off / network off`.
+RC2 stably reorders the same Top10 using the user's current category. It does
+not change Top10 membership, retrieval queries, clarification or stopping rules.
 The checker does not modify the parent shell's environment or the algorithm.
 Optional experiments in the source tree are **not active default capabilities**.
 
@@ -76,17 +78,21 @@ acceptance check for final evaluation or tune after seeing final labels.
 | --- | ---: |
 | Sessions | 200 |
 | HitRate@10 | 0.910000 |
-| MRR | 0.624024 |
+| MRR | 0.648734 |
 | MTTC | 4.255000 |
 | Efficiency | 0.674500 |
-| TechnicalScore | 0.777107 |
+| TechnicalScore | 0.784520 |
 | Default model tokens / API cost | 0 |
 
 TechnicalScore is an input to Technical Execution, **not the contest total**.
 The official weak starter's published HR/MRR/MTTC are .125/.068034/9.81.
 Later experiments were compared with our strong .91 baseline, not that starter.
-Recent field/dense/API experiments failed our all-scenario non-regression rule
-and were not promoted. See [method and limitations](docs/release/METHOD.md).
+Compared with RC1, MRR improves from .624024 to .648734; HR and MTTC are unchanged.
+The selected category ordering also passed original Shadow and a predeclared
+800-session synthetic confirmation, across all four scenarios. Other field,
+dense/API and multi-route candidates failed one or more gates and remain off.
+See [method and limitations](docs/release/METHOD.md). This is a precision gain,
+not a claim that all three metrics increased or that the Agent is globally optimal.
 
 ## Current rules and capability boundary
 

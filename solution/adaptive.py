@@ -52,6 +52,14 @@ class AdaptiveController:
         if os.environ.get("INTENTCOMPASS_SEMANTIC") == "local":
             from solution.local_reranker import LocalReranker
             self.semantic = LocalReranker(assets)
+        ordering = os.environ.get("INTENTCOMPASS_CATEGORY_ORDER", "head")
+        if ordering not in {"head", "off"}:
+            raise ValueError("INTENTCOMPASS_CATEGORY_ORDER must be head or off")
+        self.category_order = None
+        if (ordering == "head" and self.mode == "integrated" and config.retrieval == "baseline"
+                and self.offline_ranking == "constraints" and not self.semantic.enabled):
+            from solution.category_order import CategoryHeadOrder
+            self.category_order = CategoryHeadOrder(self.retriever.index)
 
     def reset(self, session_id: str, profile: dict) -> None:
         self.sessions[session_id] = AdaptiveSession(ContextMemory.create(profile))
@@ -94,6 +102,8 @@ class AdaptiveController:
                 primary_fields=self.field_evidence.get([c.parent_asin for c in candidates]) if self.field_evidence else None,
                 policy=self.offline_ranking,
             )
+        if self.category_order is not None:
+            ranked = self.category_order.reorder(ranked, state.category, fallback=result.trace.fallback_used)
         context = session.memory.distill(state)
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"

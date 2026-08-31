@@ -72,6 +72,22 @@ class ReleaseTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             assert_public_metrics(result)
 
+    def test_rc2_gate_rejects_old_mrr_and_scenario_regression(self):
+        result = {"sample_count": 200, "hit_rate_at_10": .91, "mrr": .648734, "mttc": 4.255,
+                  "recommended_technical_score": .784520, "scenario_metrics": {}}
+        scenarios = {"boundary": (.9, .636667, 6), "browsing": (.95, .700898, 3.0625),
+                     "buying": (.925, .644435, 4.275), "intent_override": (.766667, .525119, 6.8)}
+        for name, values in scenarios.items():
+            result["scenario_metrics"][name] = dict(zip(("hit_rate_at_10", "mrr", "mttc"), values))
+        assert_public_metrics(result)
+        result["mrr"] = .624024
+        with self.assertRaises(ValueError):
+            assert_public_metrics(result)
+        result["mrr"] = .648734
+        result["scenario_metrics"]["buying"]["mrr"] -= .001
+        with self.assertRaises(ValueError):
+            assert_public_metrics(result)
+
 
 if __name__ == "__main__":
     unittest.main()

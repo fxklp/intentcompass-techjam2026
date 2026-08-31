@@ -24,6 +24,7 @@ PRESET = {
     "INTENTCOMPASS_OFFLINE_RANKING": "constraints",
     "INTENTCOMPASS_SEMANTIC": "off",
     "INTENTCOMPASS_LLM_ALLOW_NETWORK": "0",
+    "INTENTCOMPASS_CATEGORY_ORDER": "head",
 }
 SECRET_ENV = {"OPENAI_API_KEY", "DASHSCOPE_API_KEY", "DEEPSEEK_API_KEY"}
 
@@ -88,10 +89,10 @@ def validate_payload(payload: dict, catalog_ids: set[str], top_k: int = 10) -> N
 
 def assert_public_metrics(result: dict) -> None:
     # Test-side expectations only: never passed to production Agent.
-    expected = {"sample_count": 200, "hit_rate_at_10": .91, "mrr": .624024, "mttc": 4.255,
-                "recommended_technical_score": .777107}
-    scenarios = {"boundary": (.9, .611667, 6), "browsing": (.95, .677808, 3.0625),
-                 "buying": (.925, .613323, 4.275), "intent_override": (.766667, .513254, 6.8)}
+    expected = {"sample_count": 200, "hit_rate_at_10": .91, "mrr": .648734, "mttc": 4.255,
+                "recommended_technical_score": .784520}
+    scenarios = {"boundary": (.9, .636667, 6), "browsing": (.95, .700898, 3.0625),
+                 "buying": (.925, .644435, 4.275), "intent_override": (.766667, .525119, 6.8)}
     for key, value in expected.items():
         if abs(result[key] - value) > 1e-6:
             raise ValueError(f"frozen Public metric mismatch: {key}")
@@ -134,7 +135,8 @@ def main() -> None:
         ids, categories, products = catalog_index(catalog)
         agent = Agent(catalog)
         try:
-            if agent._core._adaptive.offline_ranking != "constraints" or agent._core._adaptive.semantic.enabled:
+            if (agent._core._adaptive.offline_ranking != "constraints" or agent._core._adaptive.semantic.enabled
+                    or agent._core._adaptive.category_order is None):
                 raise ValueError("effective runtime is not frozen offline preset")
             for sid in ("release-smoke-a", "release-smoke-b"):
                 agent.reset(sid, {})
