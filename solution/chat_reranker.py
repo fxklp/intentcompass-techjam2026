@@ -41,9 +41,9 @@ def cost_micro_rmb(model: str, prompt: int, completion: int, region: str = "beij
             raise ValueError("unverified pricing region")
         if region == "singapore":
             input_rate, output_rate = SINGAPORE_RATES[model]
-        if model == "qwen3.7-flash" and prompt > 32768:
-            # Safety guard for unexpected provider accounting across tiers.
-            input_rate, output_rate = (("0.749", "2.998") if prompt <= 262144 else ("1.499", "5.995")) if region == "singapore" else (("0.6", "2.4") if prompt <= 262144 else ("1.2", "4.8"))
+        if model == "qwen3.7-flash" and prompt > 32000:
+            # Provider pricing defines K=1000, not the binary Ki=1024.
+            input_rate, output_rate = (("0.749", "2.998") if prompt <= 256000 else ("1.499", "5.995")) if region == "singapore" else (("0.6", "2.4") if prompt <= 256000 else ("1.2", "4.8"))
     return int((Decimal(input_rate)*prompt + Decimal(output_rate)*completion).to_integral_value(rounding=ROUND_CEILING))
 
 

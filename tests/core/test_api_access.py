@@ -48,6 +48,13 @@ class AccountLimitsTest(unittest.TestCase):
 
 
 class RegionalApiTest(unittest.TestCase):
+    def test_pricing_tiers_use_decimal_k_not_binary_kib(self):
+        self.assertEqual(cost_micro_rmb("qwen3.7-flash", 32000, 0, "singapore"), 7200)
+        self.assertEqual(cost_micro_rmb("qwen3.7-flash", 32001, 0, "singapore"), 23969)
+        self.assertEqual(cost_micro_rmb("qwen3.7-flash", 256000, 0, "singapore"), 191744)
+        self.assertEqual(cost_micro_rmb("qwen3.7-flash", 256001, 0, "singapore"), 383746)
+        self.assertEqual(cost_micro_rmb("qwen3.7-flash", 32001, 0), 19201)
+
     def test_indices_map_exactly_and_never_repair_missing_or_foreign_items(self):
         self.assertEqual(validate_index_order({"ordered_indices":[1,0]}, POOL), list(reversed(POOL)))
         for indices in ([0], [0,0], [0,2], [-1,0], [0,True], ["0","1"], [0,1,2]):

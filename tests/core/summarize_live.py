@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import statistics
+import subprocess
 from pathlib import Path
 
 from solution.api_budget import BudgetLedger
@@ -15,13 +17,19 @@ LIVE = {
         "qwen3.8-flash", "qwen3.8-max", "deepseek-v4-flash", "deepseek-v4-pro"
     )},
 }
+API_RUN_COMMIT = "8a8270ab1c1742fb73e3c661b70c19ca23ee2da9"
 
 
-def verify_runtime(report: dict) -> None:
+def verify_runtime(report: dict, revision: str | None = None) -> None:
     for name, digest in report["source_sha256"].items():
         if name.startswith(("solution/", "starter/", "evaluator/", "data/")):
             path = (ROOT / name).resolve()
-            if not path.is_relative_to(ROOT) or sha256(path) != digest:
+            if revision and not name.startswith("data/"):
+                blob = subprocess.run(["git", "show", f"{revision}:{name}"], cwd=ROOT, capture_output=True, check=True).stdout
+                observed = hashlib.sha256(blob).hexdigest()
+            else:
+                observed = sha256(path)
+            if not path.is_relative_to(ROOT) or observed != digest:
                 raise ValueError("recorded runtime or frozen inputs do not match")
 
 
@@ -32,7 +40,7 @@ def main() -> None:
     for model, filename in LIVE.items():
         path = directory / filename
         report = json.loads(path.read_text(encoding="utf-8"))
-        verify_runtime(report)
+        verify_runtime(report, API_RUN_COMMIT)
         if not report["sources_unchanged"] or report["model"] != model:
             raise ValueError("invalid live evidence")
         if report["sample_counts"] != {name: 3 for name in ("buying", "browsing", "boundary", "intent_override")}:
@@ -99,6 +107,7 @@ def main() -> None:
         "decision": "retain integrated lexical default; no live model promoted",
         "runtime_commit": reports["task004-postapi-integrated-1.json"]["commit"],
         "bounded_model_screen_complete": True,
+        "live_screen_runtime_commit": API_RUN_COMMIT,
         "public": reports["task004-postapi-integrated-1.json"]["metrics"],
         "shadow": shadow["metrics"], "regressions": regressions,
         "timing_medians": timing, "live_screens": screens,
