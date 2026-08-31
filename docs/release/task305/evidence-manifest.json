@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "candidate_code_commit": "8161868d3db5f3570721c44bdd1049b7f616aff0",
+  "catalog_sha256": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+  "files": {
+    "reports/generated/task305-paired/rc3-public.json": "fea43f476ccf9c9fbf00c2ae3620da5cb00a9796c7d8f76521fd962e91e1161f",
+    "reports/generated/task305-paired/rc3-shadow.json": "5544f0840bd300ed1a940aef8c00e0718eef378f281310113fbe2ee76940bb3c",
+    "reports/generated/task305-paired/rc3-confirm_a.json": "de3d1b2297d86f5f2976560eb402b179845b88d1781e2f344f2bb1d6e96c4558",
+    "reports/generated/task305-paired/rc3-confirm_b.json": "ec870483dbee66ded46e6e1d01903c8826fbc5536d23d3e9a670bc8a1189c2de",
+    "reports/generated/task305-paired/candidate-public-final.json": "89dbee954eb3a2fc84938a075330068dd3bd60c00d41cc05bf6ef00c9671b9d3",
+    "reports/generated/task305-paired/candidate-shadow-final.json": "328cdbdfc739bfeb7fb95002a0cac15b186335881e372e3dba0d092b44968658",
+    "reports/generated/task305-paired/candidate-confirm_a-final.json": "089e3364404e0766f104bad62b4d8f9dd6dde053f5eff978e40ad0478a648fd9",
+    "reports/generated/task305-paired/candidate-confirm_b-final.json": "931be00dc0172405059d828768fdf582a96620356dc2afdee28bf98ccba515aa",
+    "reports/generated/task305-demo-final.json": "8ac2473f52208c4768f762b10eca8c4c6f4356c9cc4aaec335c60cdf61512869",
+    "reports/generated/task305-runtime-v2/candidate-1.json": "e3960708b4784966a0f64fb8cc17fa8269a3fbc547c68e0b7f6c50ee24398707",
+    "reports/generated/task305-runtime-v2/candidate-2.json": "6cb562746d407a3d43cc58a6a4da714605aec63e76c7290076816deaf5f519ec",
+    "reports/generated/task305-runtime-v2/candidate-3.json": "5fbe259d24354be923b7c27fda4968e349b839d769b20105d815e5baf076face",
+    "reports/generated/task305-runtime-v2/rc3-1.json": "16f1c235291deabf537218151db8448213901a1436b6b6eb886d4aab4d13f5eb",
+    "reports/generated/task305-runtime-v2/rc3-2.json": "50d139211ba518422a2e1a7f8f13ed4f85d53a90ee6c5ff20b65ec675ba89d81",
+    "reports/generated/task305-runtime-v2/rc3-3.json": "33a8bd07ee48cdcc0db9df7122bdf769a03d98c24fa02f48a7e1328ed7d910ff"
+  }
+}

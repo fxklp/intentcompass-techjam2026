@@ -32,9 +32,13 @@ def peak_rss_bytes() -> int | None:
         ]
     counters = Counters()
     counters.cb = ctypes.sizeof(counters)
-    ok = ctypes.windll.psapi.GetProcessMemoryInfo(
-        ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb
-    )
+    get_current_process = ctypes.windll.kernel32.GetCurrentProcess
+    get_current_process.argtypes = []
+    get_current_process.restype = ctypes.c_void_p
+    get_memory = ctypes.windll.psapi.GetProcessMemoryInfo
+    get_memory.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_ulong]
+    get_memory.restype = ctypes.c_int
+    ok = get_memory(get_current_process(), ctypes.byref(counters), counters.cb)
     return int(counters.PeakWorkingSetSize) if ok else None
 
 
