@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
+from concurrent.futures import ThreadPoolExecutor
 
 from solution.api_budget import BudgetLedger, BudgetUnavailable
 from solution.api_demand import DemandState, evidence_text
@@ -104,6 +105,63 @@ class DemandPolicyTest(unittest.TestCase):
             for limit in (-1, 0, True, 100_000_001):
                 with self.assertRaises(BudgetUnavailable):
                     ledger.reserve("qwen3.8-max", 1, ceiling_micro_rmb=limit)
+
+    def test_run_ceiling_is_atomic_across_workers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"ledger.sqlite3"
+            BudgetLedger.initialize(path)
+            def reserve(_):
+                try:
+                    BudgetLedger(path).reserve("qwen3.8-max", 30, ceiling_micro_rmb=100)
+                    return True
+                except BudgetUnavailable:
+                    return False
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                self.assertEqual(sum(pool.map(reserve, range(6))), 3)
+            self.assertEqual(BudgetLedger(path).summary()["conservative_cost_rmb"], .00009)
+
+    def test_controller_reset_clears_memo_and_does_not_touch_other_session(self):
+        from tests.core.test_agent import CATALOG
+        from starter.agent import Agent
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"catalog.jsonl"
+            path.write_text("".join(json.dumps(item)+"\n" for item in CATALOG), encoding="utf-8", newline="\n")
+            env = {"INTENTCOMPASS_AGENT_MODE":"integrated", "INTENTCOMPASS_RETRIEVAL":"baseline", "INTENTCOMPASS_SEMANTIC":"off", "INTENTCOMPASS_LLM_ALLOW_NETWORK":"0"}
+            with patch.dict(os.environ, env):
+                agent = Agent(path)
+            try:
+                agent.reset("one", {})
+                agent.reset("two", {})
+                sessions = agent._core._adaptive.sessions
+                sessions["one"].demand.attempts = 3
+                sessions["one"].demand.key = "old-input"
+                sessions["one"].demand.ordered_ids = ("BLUE", "RED")
+                sessions["two"].demand.attempts = 2
+                agent.reset("one", {})
+                self.assertEqual(sessions["one"].demand, DemandState())
+                self.assertEqual(sessions["two"].demand.attempts, 2)
+            finally:
+                agent.close()
+
+    def test_popularity_fallback_bypasses_demand_model_exactly(self):
+        from tests.core.test_agent import CATALOG
+        from starter.agent import Agent
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"catalog.jsonl"
+            path.write_text("".join(json.dumps(item)+"\n" for item in CATALOG), encoding="utf-8", newline="\n")
+            common = {"INTENTCOMPASS_AGENT_MODE":"integrated", "INTENTCOMPASS_RETRIEVAL":"baseline", "INTENTCOMPASS_LLM_ALLOW_NETWORK":"0"}
+            responses = []
+            with patch("solution.chat_reranker.chat_post") as transport:
+                for provider in ("off", "qwen"):
+                    with patch.dict(os.environ, {**common, "INTENTCOMPASS_SEMANTIC":provider, "INTENTCOMPASS_API_POLICY":"demand20early"}):
+                        agent = Agent(path)
+                        try:
+                            agent.reset("one", {})
+                            responses.append(agent.respond("one", "zzzznotincatalog", 1, 10))
+                        finally:
+                            agent.close()
+                transport.assert_not_called()
+            self.assertEqual(responses[0], responses[1])
 
     def test_quality_gate_never_calls_two_gains_all_three(self):
         old = {"hit_rate_at_10":.9,"mrr":.6,"mttc":4,"scenario_metrics":{}}
