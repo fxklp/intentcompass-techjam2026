@@ -1,5 +1,8 @@
 # RC3 method, measurements and limitations
 
+> **Historical rollback document.** This describes RC3, not the accepted
+> TASK-306 submission. Use `docs/submission/FINAL_REPORT.md` for final claims.
+
 ## Actual frozen algorithm
 
 IntentCompass is a deterministic non-LLM shopping Agent. Its thin official

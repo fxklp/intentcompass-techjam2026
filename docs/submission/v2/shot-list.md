@@ -1,5 +1,7 @@
 # V2 headless demonstration shot list
 
+> **Superseded TASK-203 shot list.** Do not record the final video from this file.
+
 Status: capture plan only. Every capture remains `Pending` until it is recorded
 from the final clean commit and checked against the claim ledger.
 

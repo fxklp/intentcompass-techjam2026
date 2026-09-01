@@ -1,5 +1,8 @@
 # V2 requirement, policy, implementation, evidence, and shot matrix
 
+> **Historical TASK-203 matrix.** It predates TASK-306 and is not the final
+> capability or submission status.
+
 Status: reviewer-requested revision for PR #7, prepared locally. No media has
 been recorded or uploaded.
 

@@ -1,5 +1,8 @@
 # IntentCompass V2 three-minute storyboard
 
+> **Superseded TASK-203 storyboard.** It is kept as history and contains old
+> metrics/capability boundaries. Do not use it for the final TASK-306 video.
+
 Status: reviewer-requested narration and subtitle revision for PR #7. Total
 planned runtime is exactly 180 seconds. Recording remains out of scope.
 

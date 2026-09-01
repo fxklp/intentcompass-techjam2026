@@ -1,3 +1,4 @@
-# Default IntentCompass runtime uses only the Python standard library.
-# Python 3.12 or 3.13 with SQLite FTS5 is recommended.
-# Do not install requirements-semantic.txt for the default release.
+# The base local/fallback path uses only the Python standard library.
+# Python 3.12 or 3.13 with SQLite FTS5 is required.
+# For the full on-demand dense and cross-encoder path, also install
+# requirements-semantic.txt and run scripts/build_semantic_index.py --download.
