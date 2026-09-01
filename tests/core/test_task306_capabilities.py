@@ -17,6 +17,7 @@ PRODUCTS = [
     {"parent_asin": "BLUE", "title": "blue cotton walking shoes", "categories": ["shoes"], "price": 40},
     {"parent_asin": "BOOT", "title": "black waterproof hiking boot", "categories": ["boots"], "price": 70},
     {"parent_asin": "BAG", "title": "formal leather business bag", "categories": ["bags"], "price": 30},
+    {"parent_asin": "COMFORT", "title": "comfortable everyday travel sandal", "categories": ["sandals"], "price": 45},
 ]
 
 
@@ -50,6 +51,16 @@ class Task306Capabilities(unittest.TestCase):
         self.assertIn("exact_constraints", buying.trace.routes)
         self.assertEqual(browsing.trace.selected_path, "browsing")
         self.assertNotIn("exact_constraints", browsing.trace.routes)
+
+    def test_browsing_route_only_candidates_fill_unused_capacity(self):
+        retriever = CapabilityRetriever(self.catalog, self.assets)
+        self.addCleanup(retriever.close)
+        result = retriever.search(RetrievalRequest("casual shoes", 5, "browsing"))
+        ids = [item.parent_asin for item in result.candidates]
+        self.assertIn("COMFORT", ids)
+        comfort = next(item for item in result.candidates if item.parent_asin == "COMFORT")
+        self.assertIn("expanded", {e.route for e in comfort.evidence})
+        self.assertEqual(ids[:2], ["RED", "BLUE"])
 
     def test_known_budget_conflict_is_demoted_but_unknown_is_not_invented(self):
         retriever = CapabilityRetriever(self.catalog, self.assets)
@@ -96,6 +107,19 @@ class Task306Capabilities(unittest.TestCase):
         agent.reset("isolated", {})
         isolated = agent.respond("isolated", "I'm looking for shoes, but I'm still exploring.", 1, 4)
         self.assertEqual(isolated["recommendations"][0]["parent_asin"], "RED")
+
+    def test_profile_consent_boundary_also_covers_semantic_context(self):
+        with patch.dict(os.environ, {"INTENTCOMPASS_RETRIEVAL": "capability", "INTENTCOMPASS_SEMANTIC": "off"}):
+            agent = Agent(self.catalog)
+        self.addCleanup(agent.close)
+        agent.reset("unconsented", {"preference_tags": ["blue"]})
+        agent.respond("unconsented", "I'm looking for shoes, but I'm still exploring.", 1, 4)
+        unconsented = agent._core._adaptive.sessions["unconsented"].last_trace["context"]
+        self.assertEqual(unconsented["profile_priors"], {})
+        agent.reset("consented", {"consent_personalization": True, "preference_tags": ["blue"]})
+        agent.respond("consented", "I'm looking for shoes, but I'm still exploring.", 1, 4)
+        consented = agent._core._adaptive.sessions["consented"].last_trace["context"]
+        self.assertEqual(consented["profile_priors"], {"color": ["blue"]})
 
     def test_feedback_reorchestrates_query_and_preserves_preferences(self):
         with patch.dict(os.environ, {"INTENTCOMPASS_RETRIEVAL": "capability", "INTENTCOMPASS_SEMANTIC": "off"}):

@@ -206,7 +206,10 @@ class CapabilityRetriever(BaselineFTS5Retriever):
                 (identifier for identifier in scores if identifier not in baseline_ids),
                 key=lambda identifier: (-scores[identifier], identifier),
             )
-            identifiers = original
+            # Preserve every proven lexical result, but use independent-route
+            # candidates to fill otherwise unused capacity. They never evict
+            # or reorder the compatibility head on ordinary traffic.
+            identifiers = [*original, *route_only][:request.limit]
             reason = (
                 "true_buying_route" if route == "buying" else "true_browsing_route",
                 "independent_routes_preserve_proven_head",

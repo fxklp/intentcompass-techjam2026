@@ -161,6 +161,10 @@ class AdaptiveController:
                 ranked = [*head, *(c for c in ranked if c.parent_asin not in ids)]
             ranked = self.terminal.reorder(candidates, state, ranked, message, output_limit, fallback=result.trace.fallback_used)
         context = session.memory.distill(state)
+        if self.backend_name == "capability" and not state.user_profile.get("consent_personalization", False):
+            # The same consent boundary applies to every ranking backend. Do
+            # not expose unconsented aggregate priors to local/API semantics.
+            context["profile_priors"] = {}
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
         semantic_needed = (self.backend_name != "capability"
