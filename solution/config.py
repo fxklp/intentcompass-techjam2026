@@ -13,11 +13,11 @@ class CoreConfig:
     @classmethod
     def from_environment(cls) -> "CoreConfig":
         mode = os.environ.get("INTENTCOMPASS_AGENT_MODE", "integrated").strip().lower()
-        retrieval = os.environ.get("INTENTCOMPASS_RETRIEVAL", "baseline").strip().lower()
+        retrieval = os.environ.get("INTENTCOMPASS_RETRIEVAL", "capability").strip().lower()
         if mode not in {"baseline", "adaptive", "integrated"}:
             raise ValueError("INTENTCOMPASS_AGENT_MODE must be baseline, adaptive or integrated")
-        if retrieval not in {"baseline", "dual_route", "hybrid"}:
-            raise ValueError("INTENTCOMPASS_RETRIEVAL must be baseline, dual_route or hybrid")
+        if retrieval not in {"baseline", "dual_route", "hybrid", "capability"}:
+            raise ValueError("INTENTCOMPASS_RETRIEVAL must be baseline, dual_route, hybrid or capability")
         if mode == "baseline" and retrieval != "baseline":
             raise ValueError("dual_route requires explicit adaptive mode")
         return cls(mode, retrieval)

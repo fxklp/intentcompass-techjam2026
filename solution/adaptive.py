@@ -11,7 +11,7 @@ from solution.config import CoreConfig
 from solution.context import ContextMemory
 from solution.contracts import AgentResponse, Candidate
 from solution.ranker import rank_candidates
-from solution.retrieval import BaselineFTS5Retriever, DualRouteInMemoryRetriever
+from solution.retrieval import BaselineFTS5Retriever, CapabilityRetriever, DualRouteInMemoryRetriever
 from solution.retrieval.contracts import RetrievalConstraint, RetrievalRequest
 from solution.state import SessionState
 from solution.semantic import MAX_CANDIDATES
@@ -32,7 +32,9 @@ class AdaptiveController:
     def __init__(self, catalog_path: Path, config: CoreConfig) -> None:
         backend = DualRouteInMemoryRetriever if config.retrieval == "dual_route" else BaselineFTS5Retriever
         assets = Path(os.environ.get("INTENTCOMPASS_SEMANTIC_ASSETS", str(Path(__file__).resolve().parents[1] / "artifacts/semantic")))
-        if config.retrieval == "hybrid":
+        if config.retrieval == "capability":
+            self.retriever = CapabilityRetriever(catalog_path, assets)
+        elif config.retrieval == "hybrid":
             from solution.retrieval.hybrid import HybridRetriever
             self.retriever = HybridRetriever(catalog_path, assets)
         else:
@@ -48,16 +50,17 @@ class AdaptiveController:
             from solution.field_evidence import FieldEvidence
             self.field_evidence = FieldEvidence(self.retriever.index.connection)
         self.sessions: dict[str, AdaptiveSession] = {}
+        semantic_mode = os.environ.get("INTENTCOMPASS_SEMANTIC", "local" if config.retrieval == "capability" else "off")
         self.semantic = make_reranker()
-        if os.environ.get("INTENTCOMPASS_SEMANTIC") == "local":
+        if semantic_mode == "local":
             from solution.local_reranker import LocalReranker
             self.semantic = LocalReranker(assets)
         ordering = os.environ.get("INTENTCOMPASS_CATEGORY_ORDER", "head")
         if ordering not in {"head", "off"}:
             raise ValueError("INTENTCOMPASS_CATEGORY_ORDER must be head or off")
         self.category_order = None
-        if (ordering == "head" and self.mode == "integrated" and config.retrieval == "baseline"
-                and self.offline_ranking == "constraints" and not self.semantic.enabled):
+        if (ordering == "head" and self.mode == "integrated" and config.retrieval in {"baseline", "capability"}
+                and self.offline_ranking == "constraints"):
             from solution.category_order import CategoryHeadOrder
             self.category_order = CategoryHeadOrder(self.retriever.index)
         terminal_mode = os.environ.get("INTENTCOMPASS_TERMINAL_RECOVERY", "lastchance")
@@ -108,9 +111,12 @@ class AdaptiveController:
         query = state.retrieval_query(turn)
         if self.mode != "integrated" and plan.recovery and state.category:
             query = state.category
+        pool_limit = self.terminal.pool_limit(state, message, output_limit) if self.terminal else (50 if self.mode == "integrated" else plan.pool_limit)
+        if plan.recovery:
+            pool_limit = max(pool_limit, plan.pool_limit)
         request = RetrievalRequest(
             query=query,
-            limit=self.terminal.pool_limit(state, message, output_limit) if self.terminal else (50 if self.mode == "integrated" else plan.pool_limit),
+            limit=pool_limit,
             route_hint=plan.route,
             category=state.category,
             constraints=tuple(RetrievalConstraint(key, slot.values) for key, slot in state.preferences.items()),
@@ -128,8 +134,11 @@ class AdaptiveController:
             ranked = rank_candidates(candidates, state, ranking_limit, policy="constraints")
             ranked = refine_by_dominance(ranked, state, self.field_evidence.get([c.parent_asin for c in ranked[:10]]))
         else:
+            priors = session.memory.active_priors()
+            if self.backend_name == "capability" and not state.user_profile.get("consent_personalization", False):
+                priors = ()
             ranked = candidates[:ranking_limit] if result.trace.fallback_used else rank_candidates(
-                candidates, state, ranking_limit, profile_priors=() if self.mode == "integrated" else session.memory.active_priors(),
+                candidates, state, ranking_limit, profile_priors=priors,
                 primary_fields=self.field_evidence.get([c.parent_asin for c in candidates]) if self.field_evidence else None,
                 policy=self.offline_ranking,
             )
@@ -154,7 +163,10 @@ class AdaptiveController:
         context = session.memory.distill(state)
         semantic_result = None
         cutoff = self.mode == "integrated" and plan.reason == "cutoff_and_clarify"
-        if not result.trace.fallback_used and output_limit > 0 and not cutoff:
+        semantic_needed = (self.backend_name != "capability"
+                           or "semantic_candidate" in result.trace.reason_codes
+                           or os.environ.get("INTENTCOMPASS_FORCE_SEMANTIC") == "1")
+        if not result.trace.fallback_used and output_limit > 0 and not cutoff and semantic_needed:
             if getattr(self.semantic, "demand_variant", "legacy") != "legacy":
                 semantic_result = session.demand.rerank(self.semantic, ranked, context)
             else:

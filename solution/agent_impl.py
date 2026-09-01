@@ -156,6 +156,14 @@ class Agent:
         else:
             self._retriever.close()
 
+    def export_profile(self, session_id: str) -> dict:
+        """Explicit caller-controlled handoff; never infer identity from IDs."""
+        normalized_id = str(session_id)
+        if self._adaptive is None or normalized_id not in self._sessions:
+            raise RuntimeError("reset must be called before exporting a profile")
+        profile = self._adaptive.sessions[normalized_id].memory.export_profile()
+        return {"consent_personalization": True, **profile}
+
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
         if not 1 <= int(turn) <= 10:
             raise ValueError("official session turn must be between 1 and 10")

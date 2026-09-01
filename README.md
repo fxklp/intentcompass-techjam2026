@@ -5,6 +5,29 @@ replaceable preferences, searches a frozen catalog, asks structured clarificatio
 questions and returns ranked product identifiers. No UI or transaction service.
 The customer conversations are simulated, not real-user conversations.
 
+## TASK-306 capability-complete candidate
+
+This branch advances the RC3 rollback with real Buying/Browsing routes,
+three-valued constraint handling, on-demand in-memory dense retrieval, bounded
+diversity, local cross-encoder ranking, early over-generality cutoff, explicit
+profile handoff and dynamic recovery. All four existing evaluation sets match
+RC3 exactly on HR@10/MRR/MTTC. See the
+[candidate handoff](docs/release/task306/HANDOFF.md) for setup, evidence,
+dependencies and limitations.
+
+The capability default needs the pinned CPU semantic dependencies and assets:
+
+```text
+python -m pip install -r requirements-semantic.txt
+python scripts/setup_data.py
+python scripts/build_semantic_index.py --download
+```
+
+The generated text-only assets are checksum-verified and kept outside Git.
+Without them the Agent fails closed to lexical retrieval. The RC3 instructions
+below remain the reproducible rollback path; `release_check.py` intentionally
+tests RC3 and must not be presented as TASK-306 acceptance evidence.
+
 ## Start here: RC3 final offline algorithm
 
 Use **Python 3.12 or 3.13 with SQLite FTS5**. No third-party Python package, GPU,

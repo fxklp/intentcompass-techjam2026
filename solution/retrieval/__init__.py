@@ -10,12 +10,14 @@ from solution.retrieval.contracts import (
     RetrievalTrace,
 )
 from solution.retrieval.dual_route import DualRouteInMemoryRetriever
+from solution.retrieval.capability import CapabilityRetriever
 
 __all__ = [
     "BaselineFTS5Retriever",
     "Candidate",
     "CandidateRetriever",
     "DualRouteInMemoryRetriever",
+    "CapabilityRetriever",
     "RetrievalConstraint",
     "RetrievalRequest",
     "RetrievalResult",
