@@ -4,11 +4,13 @@ import json
 import math
 import re
 import sqlite3
+import sys
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
 
 from solution.contracts import flatten_text
+from solution.retrieval.query_cache import QueryCache
 
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
@@ -34,7 +36,7 @@ def float_or_none(value: object) -> float | None:
         return None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ProductRecord:
     parent_asin: str
     searchable_text: str
@@ -50,10 +52,12 @@ class FTS5CatalogIndex:
         self._finalizer = weakref.finalize(self, self.connection.close)
         self.products: dict[str, ProductRecord] = {}
         self.fallback_ids: list[str] = []
+        self.query_cache = QueryCache()
         self._build(Path(catalog_path))
 
     def close(self) -> None:
         self._finalizer()
+        self.query_cache.clear()
 
     def _build(self, catalog_path: Path) -> None:
         cursor = self.connection.cursor()
@@ -83,7 +87,7 @@ class FTS5CatalogIndex:
                     parent_asin=parent_asin,
                     searchable_text=" ".join(fields),
                     price=price,
-                    categories=tuple(str(value) for value in product.get("categories") or ()),
+                    categories=tuple(sys.intern(str(value)) for value in product.get("categories") or ()),
                 )
                 popularity.append((math.log1p(max(0, rating_count)) * rating, rating, parent_asin))
                 batch.append((parent_asin, *fields))
@@ -109,7 +113,7 @@ class FTS5CatalogIndex:
             "FROM products WHERE products MATCH ? ORDER BY 2 LIMIT ?"
         )
         try:
-            rows = self.connection.execute(sql, (*weights, expression, int(limit))).fetchall()
+            rows = self.query_cache.get((expression, int(limit), weights), lambda: self.connection.execute(sql, (*weights, expression, int(limit))).fetchall())
         except sqlite3.Error:
             return []
         return [(str(parent_asin), float(score)) for parent_asin, score in rows]

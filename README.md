@@ -1,121 +1,190 @@
-# TechJam Conversational E-Commerce Search Challenge
+# IntentCompass — Track 4 Shopping Copilot
 
-Build an AI shopping agent that asks useful follow-up questions and recommends the customer's hidden target product within at most 10 turns.
+A CPU-only conversational shopping Agent for TikTok TechJam 2026. It maintains
+replaceable preferences, searches a frozen catalog, asks structured clarification
+questions and returns ranked product identifiers. No UI or transaction service.
+The customer conversations are simulated, not real-user conversations.
 
-## What You Receive
+## TASK-306 capability-complete candidate
 
-- A frozen catalog of 50,000 products from the `Clothing_Shoes_and_Jewelry` category of Amazon Reviews 2023.
-- 200 labeled public sessions for local development.
-- A weak BM25 starter agent and deterministic local evaluator.
-- The Agent API contract and scoring rules.
+This branch advances the RC3 rollback with real Buying/Browsing routes,
+three-valued constraint handling, on-demand in-memory dense retrieval, bounded
+diversity, local cross-encoder ranking, early over-generality cutoff, explicit
+profile handoff and dynamic recovery. All four existing evaluation sets match
+RC3 exactly on HR@10/MRR/MTTC. See the
+[candidate handoff](docs/release/task306/HANDOFF.md) for setup, evidence,
+dependencies and limitations.
 
-The organizer keeps 800 additional sessions private for final evaluation.
+The capability default needs the pinned CPU semantic dependencies and assets:
 
-## Task
-
-For each session, your agent receives an anonymized preference profile and a short customer message. Raw user IDs, review text, timestamps, and purchase history are never disclosed. On every turn the agent may:
-
-- ask a natural clarification question in `message` and identify one requested field in `ask_attribute`;
-- return a ranked list of up to 10 catalog `parent_asin` values;
-- do both in the same response.
-
-The session ends when the target product appears in the scored Top 10 or after turn 10. Sessions cover Buying, Browsing, Intent Override, and Boundary behavior.
-
-## Download the Catalog
-
-The 60 MB extracted catalog is intentionally not stored in the team repository.
-Download it from the organizer's official `participant-kit` release and verify
-it with one cross-platform command:
-
-```bash
+```text
+python -m pip install -r requirements-semantic.txt
 python scripts/setup_data.py
+python scripts/build_semantic_index.py --download
 ```
 
-The script verifies the organizer-published archive checksum and the accepted
-extracted catalog checksum before placing it at `data/catalog.jsonl`. Source:
-[official participant kit](https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit).
+The generated text-only assets are checksum-verified and kept outside Git.
+Without them the Agent fails closed to lexical retrieval. The RC3 instructions
+below remain the reproducible rollback path; `release_check.py` intentionally
+tests RC3 and must not be presented as TASK-306 acceptance evidence.
 
-Then run the repeatable first demo:
+## Start here: RC3 final offline algorithm
 
-```bash
-python demo/run_demo.py
+Use **Python 3.12 or 3.13 with SQLite FTS5**. No third-party Python package, GPU,
+downloaded model, API key, paid service or external database is required.
+On macOS use `python3` if `python` is unavailable. Run from this folder.
+
+```text
+python scripts/setup_data.py
+python scripts/release_check.py
 ```
 
-## Run the Starter
+The first command downloads and checksum-verifies the official catalog (network
+needed once). The second uses a fixed offline preset, ignores inherited experiment
+settings in its own process, checks the Agent contract/reset, evaluates all 200
+Public sessions with the unchanged evaluator, and runs the real demo.
+It checks that no network connections are attempted during this verification.
+Success ends with `RELEASE CHECK PASSED`. Full per-session `results.json` and
+provenance go to a new `reports/generated/release-.../` directory.
 
-Python 3.10 or later is recommended. The starter uses only the Python standard library.
+In a released ZIP, `RELEASE-MANIFEST.json` records source commit and file hashes.
+The checker rejects altered/missing payloads. The ZIP needs no Git executable;
+catalog, credentials, model assets, caches and API ledger are excluded.
+Verify its checksum against the team lead's handoff before extraction.
 
-```bash
-python3 -m evaluator.local_evaluator
-```
+The preset is `integrated / baseline FTS / constraints / category head /
+terminal lastchance / precision separate / final policy on / semantic off / network off`.
+RC3 packages the accepted TASK-015 final algorithm: category/full-phrase/title
+evidence ordering, guarded terminal recovery and a bounded clarification change
+after three consecutive no-preference replies. Official scoring/stopping rules
+remain unchanged. The algorithm freeze is
+`4968804054bc1159007d34fe40e976bca508fb4f`; the bundle manifest also records its
+separate packaging source commit. Never mix RC1/RC2 files with this version.
+The checker does not modify the parent shell's environment or the algorithm.
+Optional experiments in the source tree are **not active default capabilities**.
 
-Edit `starter/agent.py` to implement your system. Do not edit the evaluator or public labels when reporting your local score.
-The command writes per-session results and aggregate metrics to `results.json`.
+## Interface and direct recording
 
-The included weak BM25 starter scores Hit Rate@10 `0.125`, MRR `0.068034`, and
-MTTC `9.81` on the released public set. See `docs/baseline_results.json`.
-
-## Agent Interface
+The official entry is `starter/agent.py:Agent`, delegating to `solution/`:
 
 ```python
-class Agent:
-    def reset(self, session_id: str, user_profile: dict) -> None:
-        ...
+from starter.agent import Agent
 
-    def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
-        return {
-            "message": "Do you have a material preference?",
-            "ask_attribute": "material",
-            "recommendations": [
-                {"parent_asin": "B000..."},
-                {"parent_asin": "B001..."}
-            ],
-            "usage": {"prompt_tokens": 120, "completion_tokens": 30}
-        }
+agent = Agent("data/catalog.jsonl")
+try:
+    agent.reset("example", {})
+    result = agent.respond("example", "I'm looking for shoes.", 1, 10)
+finally:
+    agent.close()
 ```
 
-`ask_attribute` is one of `category`, `material`, `color`, `size`, `style`, `brand`, `budget`, `feature`, `use_case`, `other`, or `null`. See `docs/agent_api_contract.json`.
+Responses contain natural `message`, one `ask_attribute`, up to ten valid unique
+`parent_asin` values, and zero prompt/completion tokens. The ten-turn bound and
+session reset contract are preserved.
 
-## Technical Metrics
-
-- **Hit Rate@10:** fraction of sessions that find the target within 10 turns.
-- **MRR:** mean reciprocal rank of the target; a miss contributes zero.
-- **MTTC:** mean first-hit turn; a miss is assigned turn 11.
-- **Reported token usage:** prompt and completion tokens returned by the team's model client.
+For direct recording in a fresh shell with no `INTENTCOMPASS_*` overrides:
 
 ```text
-TechnicalScore = 0.50 × HitRate@10 + 0.30 × MRR + 0.20 × Efficiency
-Efficiency = clip((11 - MTTC) / 10, 0, 1)
+python demo/run_demo.py
+python scripts/run_offline.py --output results.json
 ```
 
-`TechnicalScore` is an objective input to the `Technical Execution` assessment. It is not a separate judging criterion and does not represent the entire `Technical Execution` score.
+The real Public demo first hits after intent override on turn 5 at rank 8.
+Only the harness knows the target; the Agent does not receive it.
+Use a new results filename on subsequent runs to preserve previous evidence.
+`run_offline.py` selects the frozen preset and forwards all arguments to the
+unchanged `evaluator.local_evaluator`; it does not impose Public reference
+scores. The underlying equivalent command is
+`python -m evaluator.local_evaluator --output results.json` with that preset.
+For the future final package, follow its released instructions and use its
+unmodified evaluator with the frozen solution; do not substitute the Public
+acceptance check for final evaluation or tune after seeing final labels.
 
-Only exact `parent_asin` equality produces a hit. Core metrics are also reported by scenario.
+## Reproduced Public results
 
-## Model Choice and Cost
+| Metric | Frozen offline default |
+| --- | ---: |
+| Sessions | 200 |
+| HitRate@10 | 0.980000 |
+| MRR | 0.696861 |
+| MTTC | 3.755000 |
+| Efficiency | 0.724500 |
+| TechnicalScore | 0.843958 |
+| Default model tokens / API cost | 0 |
 
-Teams may use any legally accessible LLM API or local model. Teams manage their own credentials and must never commit API keys. Model choice, estimated cost, token usage, and latency must be disclosed. Token usage is a feasibility metric, not part of the core technical score. The organizer does not provide or reimburse model API credits; teams are responsible for any costs incurred through optional external services.
+TechnicalScore is an input to Technical Execution, **not the contest total**.
+The official weak starter's published HR/MRR/MTTC are .125/.068034/9.81.
+Later experiments were compared with our strong .91 baseline, not that starter.
+Compared with the preceding TASK-013 algorithm, all three overall metrics improve
+on Public, Shadow and two existing synthetic 800-session sets. Two small
+scenario MRR decreases were explicitly accepted: A/buying .692729 -> .690502;
+B/intent override .633509 -> .629838. This is NOT all-scenario non-regression.
+The final extraction reproduced the selected candidate exactly on those same
+sets; repeated reproduction is not new independent validation.
+See [method and limitations](docs/release/METHOD.md). No hidden-set or global
+optimality claim is made. Optional dense/API/multi-route experiments remain off.
 
-## Files
+TASK-015 controlled Windows measurements: response p50 25.66 ms, p95 102.46 ms,
+p99 141.08 ms; p95 about 5.48 ms above TASK-013. These are machine-specific
+three-pair medians, not speed guarantees for your machine.
+
+## Current rules and capability boundary
+
+The [current official submission rules](https://github.com/TechJam2026/techjam-conversational-search/blob/main/docs/submission_rules.md),
+checked 2026-08-31, explicitly allow non-LLM methods. After the deadline, evaluate
+the released final package with the unmodified official evaluator and the commit
+frozen at the Devpost deadline. Retain results and environment details. Do not
+change the Agent, prompts, indexes or configuration after that freeze.
+
+The checked-in original `docs/submission_rules.md` in the full repository is
+historical; its network-policy wording does not describe the current rules.
+Offline operation is our choice, not an organizer mandate.
+
+The broader [Track 4 statement](https://bytedance.larkoffice.com/wiki/GdYFwzWNLiREsSkuIjZcDznInWc)
+also describes richer dense/multi-route retrieval, LLM ranking and orchestration.
+Those are not all active in this default. See the [requirements audit](docs/release/REQUIREMENTS.md).
+We do not claim full four-pillar coverage, guaranteed eligibility, private-set
+accuracy, or a globally optimal Agent.
+
+## Team contributions
+
+- Fang Tianchen: initial end-to-end Agent, algorithm/architecture direction and
+  final integration with AI coding assistance.
+- Liu Chunyi: QA, cross-platform contract/CI work and independent reviews.
+- Cheng Xianyun: reproduction analysis, evidence organization and demo storyboard;
+  final video production remains a separate deliverable.
+- Wang Siwen: isolated retrieval experiments, benchmarks and evidence-integrity
+  fixes. Rejected candidates are not described as deployed improvements.
+
+AI coding assistance supported implementation, tests and documentation; the team
+remains responsible for correctness and explaining the work.
+
+## Developer checks and packaging
+
+These require the full Git checkout, not the compact released ZIP:
 
 ```text
-data/public_set.jsonl             200 labeled development sessions
-docs/competition_specification.md participant rules and evaluation protocol
-docs/agent_api_contract.json      machine-readable Agent contract
-docs/evaluation_config.json       scoring configuration
-docs/baseline_results.json        reproducible weak-starter reference score
-starter/agent.py                  editable weak starter
-evaluator/local_evaluator.py      public-set simulator and scorer
+python -m unittest discover -s tests -p "test_*.py"
+python scripts/team_gate.py --full-eval
+python scripts/build_release.py --output artifacts/release/intentcompass-rc3.zip
 ```
 
-## Judging and Submission Policy
+The builder requires a clean committed tree and a new output path. One optional
+ONNX smoke test can skip without model dependencies. Do not run old experiment
+summary scripts for release acceptance: they pin historical source hashes.
 
-- Participant submission requirements: `docs/submission_rules.md`
-- Organizer-only final judging controls: `organizer/JUDGING_RUNBOOK.md`
-- Organizer private release checklist: `organizer/private_release_checklist.md`
-- Judging day operations SOP: `organizer/JUDGING_DAY_SOP.md`
+## Data and remaining submission materials
 
-## Data Source
+The official kit supplies 50,000 Clothing/Shoes/Jewelry products and 200 Public
+sessions derived from Amazon Reviews 2023. Only released Public labels are
+packaged. Catalog files stay external and checksum-verified.
+Preserve [data attribution](DATA_ATTRIBUTION.md) and respect upstream terms.
 
-The catalog and sessions are derived from Amazon Reviews 2023 by McAuley Lab, UCSD. See `DATA_ATTRIBUTION.md` before using or redistributing the data.
-Sessions are sampled deterministically from the official Clothing 5-core leave-last-out split and joined to the frozen catalog.
+Devpost requires an English description, public repository with README and a
+**public three-minute YouTube demo**. Passing technical checks does not complete
+video production or submission. See [recording guidance](docs/release/VIDEO-HANDOFF.md).
+These tools never upload a video or submit a project.
+
+For independent Windows/macOS acceptance, use the [team test instructions](docs/release/TEAM-TEST.md).
+Send the new ZIP, its external SHA256 and returned evidence through the team lead.
+Independent teammate acceptance remains pending until their actual results arrive.

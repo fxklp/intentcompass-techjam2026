@@ -7,9 +7,11 @@ import weakref
 from pathlib import Path
 
 from solution.contracts import AgentResponse, Candidate, RetrievalRequest, flatten_text
+from solution.config import CoreConfig
 from solution.question_policy import choose_question
 from solution.ranker import rank_candidates
 from solution.state import SessionState
+from solution.retrieval.query_cache import QueryCache
 
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
@@ -36,11 +38,13 @@ class _BaselineBM25Index:
         self._finalizer = weakref.finalize(self, self.connection.close)
         self.products: dict[str, tuple[str, float | None, float, int]] = {}
         self.fallback_ids: list[str] = []
+        self.query_cache = QueryCache()
         self._build(catalog_path)
 
     def close(self) -> None:
         """Release the in-memory FTS index; safe to call more than once."""
         self._finalizer()
+        self.query_cache.clear()
 
     def _build(self, catalog_path: Path) -> None:
         cursor = self.connection.cursor()
@@ -88,11 +92,11 @@ class _BaselineBM25Index:
         if unique_terms:
             expression = " OR ".join(f'"{term}"' for term in unique_terms)
             try:
-                rows = self.connection.execute(
+                rows = self.query_cache.get((expression, limit), lambda: self.connection.execute(
                     "SELECT parent_asin, bm25(products, 0.0, 6.0, 4.0, 2.5, 2.5, 1.5, 1.0) "
                     "FROM products WHERE products MATCH ? ORDER BY 2 LIMIT ?",
                     (expression, limit),
-                ).fetchall()
+                ).fetchall())
             except sqlite3.Error:
                 rows = []
         if not rows:
@@ -129,21 +133,46 @@ class Agent:
 
     def __init__(self, catalog_path: str | Path = "data/catalog.jsonl") -> None:
         self.catalog_path = Path(catalog_path)
-        self._retriever = _BaselineBM25Index(self.catalog_path)
+        config = CoreConfig.from_environment()
+        self._adaptive = None
+        if config.mode in {"adaptive", "integrated"}:
+            from solution.adaptive import AdaptiveController
+
+            self._adaptive = AdaptiveController(self.catalog_path, config)
+            self._retriever = self._adaptive.retriever
+        else:
+            self._retriever = _BaselineBM25Index(self.catalog_path)
         self._sessions: dict[str, SessionState] = {}
 
     def reset(self, session_id: str, user_profile: dict) -> None:
         normalized_id = str(session_id)
         self._sessions[normalized_id] = SessionState.create(normalized_id, user_profile)
+        if self._adaptive is not None:
+            self._adaptive.reset(normalized_id, user_profile)
 
     def close(self) -> None:
-        self._retriever.close()
+        if self._adaptive is not None:
+            self._adaptive.close()
+        else:
+            self._retriever.close()
+
+    def export_profile(self, session_id: str) -> dict:
+        """Explicit caller-controlled handoff; never infer identity from IDs."""
+        normalized_id = str(session_id)
+        if self._adaptive is None or normalized_id not in self._sessions:
+            raise RuntimeError("reset must be called before exporting a profile")
+        profile = self._adaptive.sessions[normalized_id].memory.export_profile()
+        return {"consent_personalization": True, **profile}
 
     def respond(self, session_id: str, user_message: str, turn: int, top_k: int) -> dict:
+        if not 1 <= int(turn) <= 10:
+            raise ValueError("official session turn must be between 1 and 10")
         normalized_id = str(session_id)
         if normalized_id not in self._sessions:
             raise RuntimeError("reset must be called before respond")
         state = self._sessions[normalized_id]
+        if self._adaptive is not None:
+            return self._adaptive.respond(state, str(user_message), int(turn), int(top_k))
         state.apply_user_message(str(user_message), int(turn))
         output_limit = max(0, min(10, int(top_k)))
         request = RetrievalRequest(
