@@ -1,5 +1,9 @@
 # RC3 release requirements audit — 2026-08-31
 
+> **Historical audit.** TASK-306 later completed the capability pipeline and was
+> accepted through PR #12. Use `docs/submission/FINAL_REPORT.md` and
+> `docs/submission/FINAL_DELIVERABLE_CHECKLIST.md` for the final submission.
+
 This is a technical/claim audit, not an organizer certification. Current sources:
 
 - [Track 4 statement, sections 4.2–4.6](https://bytedance.larkoffice.com/wiki/GdYFwzWNLiREsSkuIjZcDznInWc), read in the browser, showing an August 31 update.

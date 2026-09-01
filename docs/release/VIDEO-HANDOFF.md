@@ -1,5 +1,8 @@
 # RC3 video handoff — facts to record, not fabricated output
 
+> **Superseded.** This RC3 handoff is retained for provenance only. Do not use
+> its architecture, metrics or script for the final TASK-306 video.
+
 Use the frozen release version only after independent reproduction. Existing
 Cheng storyboard `docs/submission/v2/storyboard-3min.md` in the full repository
 remains historical and has not been overwritten. Reuse its story structure,

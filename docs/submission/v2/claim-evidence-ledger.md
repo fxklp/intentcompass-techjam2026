@@ -1,5 +1,8 @@
 # V2 claim and evidence ledger
 
+> **Historical TASK-203 ledger.** It predates TASK-306. Use the final report and
+> TASK-306 handoff for current claims.
+
 Status: reviewer-requested revision for PR #7, prepared locally. `Verified`
 claims may be used exactly as bounded below. `Partial` and `Pending` claims must
 not be narrated as complete.

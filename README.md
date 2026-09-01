@@ -1,71 +1,34 @@
-# IntentCompass — Track 4 Shopping Copilot
+# IntentCompass — Track 4 Conversational Product Search
 
-A CPU-only conversational shopping Agent for TikTok TechJam 2026. It maintains
-replaceable preferences, searches a frozen catalog, asks structured clarification
-questions and returns ranked product identifiers. No UI or transaction service.
-The customer conversations are simulated, not real-user conversations.
+IntentCompass is a local-first, CPU-based Python shopping Agent for TikTok
+TechJam 2026 Track 4. It maintains replaceable multi-turn intent, routes Buying
+and Browsing requests, searches a frozen 50,000-product catalog, asks structured
+clarifying questions and returns an ordered Top 10 of valid `parent_asin` values.
 
-## TASK-306 capability-complete candidate
+The accepted implementation is commit
+`1513020a35fb54700e2a63f2265e4d80ca10af48`, merged through PR #12. It does
+not modify the official evaluator, catalog, labels, scoring or stopping rules.
 
-This branch advances the RC3 rollback with real Buying/Browsing routes,
-three-valued constraint handling, on-demand in-memory dense retrieval, bounded
-diversity, local cross-encoder ranking, early over-generality cutoff, explicit
-profile handoff and dynamic recovery. All four existing evaluation sets match
-RC3 exactly on HR@10/MRR/MTTC. See the
-[candidate handoff](docs/release/task306/HANDOFF.md) for setup, evidence,
-dependencies and limitations.
+## What it implements
 
-The capability default needs the pinned CPU semantic dependencies and assets:
+- structured preference accumulation, `no preference` handling and intent override;
+- Buying/Browsing workflow routing and recovery after rejection or lexical miss;
+- one in-memory SQLite FTS5 index serving keyword, category, exact-constraint
+  and query-expansion routes;
+- three-valued constraint semantics: satisfied, conflict and unknown;
+- on-demand in-memory MiniLM dense retrieval and bounded category diversity;
+- guarded lexical ordering plus an on-demand local MS MARCO MiniLM cross-encoder;
+- early over-generality cutoff, dynamic clarification and deterministic fallback;
+- optional, explicit, consent-marked profile handoff between caller-managed sessions;
+- optional Qwen/DeepSeek adapters with strict output validation, cost limits,
+  circuit breaking and offline fallback.
 
-```text
-python -m pip install -r requirements-semantic.txt
-python scripts/setup_data.py
-python scripts/build_semantic_index.py --download
-```
+Semantic work is demand-driven. Missing or invalid model assets fail closed to
+the lexical pipeline, and no model is downloaded at runtime.
 
-The generated text-only assets are checksum-verified and kept outside Git.
-Without them the Agent fails closed to lexical retrieval. The RC3 instructions
-below remain the reproducible rollback path; `release_check.py` intentionally
-tests RC3 and must not be presented as TASK-306 acceptance evidence.
+## Required interface
 
-## Start here: RC3 final offline algorithm
-
-Use **Python 3.12 or 3.13 with SQLite FTS5**. No third-party Python package, GPU,
-downloaded model, API key, paid service or external database is required.
-On macOS use `python3` if `python` is unavailable. Run from this folder.
-
-```text
-python scripts/setup_data.py
-python scripts/release_check.py
-```
-
-The first command downloads and checksum-verifies the official catalog (network
-needed once). The second uses a fixed offline preset, ignores inherited experiment
-settings in its own process, checks the Agent contract/reset, evaluates all 200
-Public sessions with the unchanged evaluator, and runs the real demo.
-It checks that no network connections are attempted during this verification.
-Success ends with `RELEASE CHECK PASSED`. Full per-session `results.json` and
-provenance go to a new `reports/generated/release-.../` directory.
-
-In a released ZIP, `RELEASE-MANIFEST.json` records source commit and file hashes.
-The checker rejects altered/missing payloads. The ZIP needs no Git executable;
-catalog, credentials, model assets, caches and API ledger are excluded.
-Verify its checksum against the team lead's handoff before extraction.
-
-The preset is `integrated / baseline FTS / constraints / category head /
-terminal lastchance / precision separate / final policy on / semantic off / network off`.
-RC3 packages the accepted TASK-015 final algorithm: category/full-phrase/title
-evidence ordering, guarded terminal recovery and a bounded clarification change
-after three consecutive no-preference replies. Official scoring/stopping rules
-remain unchanged. The algorithm freeze is
-`4968804054bc1159007d34fe40e976bca508fb4f`; the bundle manifest also records its
-separate packaging source commit. Never mix RC1/RC2 files with this version.
-The checker does not modify the parent shell's environment or the algorithm.
-Optional experiments in the source tree are **not active default capabilities**.
-
-## Interface and direct recording
-
-The official entry is `starter/agent.py:Agent`, delegating to `solution/`:
+The official entry is `starter.agent.Agent`:
 
 ```python
 from starter.agent import Agent
@@ -73,118 +36,136 @@ from starter.agent import Agent
 agent = Agent("data/catalog.jsonl")
 try:
     agent.reset("example", {})
-    result = agent.respond("example", "I'm looking for shoes.", 1, 10)
+    response = agent.respond("example", "I'm looking for shoes.", 1, 10)
 finally:
     agent.close()
 ```
 
-Responses contain natural `message`, one `ask_attribute`, up to ten valid unique
-`parent_asin` values, and zero prompt/completion tokens. The ten-turn bound and
-session reset contract are preserved.
+`response` contains a natural `message`, one allowed `ask_attribute`, up to ten
+ordered unique catalog IDs, and model `usage` when applicable.
 
-For direct recording in a fresh shell with no `INTENTCOMPASS_*` overrides:
+## Setup
+
+Use Python 3.12 or 3.13 with SQLite FTS5.
+
+### Base local path
 
 ```text
+python scripts/setup_data.py
 python demo/run_demo.py
-python scripts/run_offline.py --output results.json
+python -m evaluator.local_evaluator --output results.json
 ```
 
-The real Public demo first hits after intent override on turn 5 at rank 8.
-Only the harness knows the target; the Agent does not receive it.
-Use a new results filename on subsequent runs to preserve previous evidence.
-`run_offline.py` selects the frozen preset and forwards all arguments to the
-unchanged `evaluator.local_evaluator`; it does not impose Public reference
-scores. The underlying equivalent command is
-`python -m evaluator.local_evaluator --output results.json` with that preset.
-For the future final package, follow its released instructions and use its
-unmodified evaluator with the frozen solution; do not substitute the Public
-acceptance check for final evaluation or tune after seeing final labels.
+The base path uses only the Python standard library and runs without credentials,
+GPU, external database or scoring-time network access.
+
+### Full local semantic path
+
+```text
+python -m venv .venv
+# Windows: .venv\Scripts\python.exe
+# macOS/Linux: .venv/bin/python
+python -m pip install -r requirements-semantic.txt
+python scripts/setup_data.py
+python scripts/build_semantic_index.py --download
+python scripts/task306_evaluate.py --split public --semantic local --output results.json
+```
+
+The one-time semantic build downloads pinned ONNX models, verifies their source
+revisions and builds a catalog-derived dense matrix. Generated assets are kept
+outside Git. Set `INTENTCOMPASS_SEMANTIC_ASSETS` only when assets are stored
+outside the default `artifacts/semantic` directory.
 
 ## Reproduced Public results
 
-| Metric | Frozen offline default |
-| --- | ---: |
-| Sessions | 200 |
+These are development-set results over the released 200-session Public set, not
+the organizer's private score:
+
+| Metric | IntentCompass |
+|---|---:|
 | HitRate@10 | 0.980000 |
 | MRR | 0.696861 |
 | MTTC | 3.755000 |
 | Efficiency | 0.724500 |
 | TechnicalScore | 0.843958 |
-| Default model tokens / API cost | 0 |
 
-TechnicalScore is an input to Technical Execution, **not the contest total**.
-The official weak starter's published HR/MRR/MTTC are .125/.068034/9.81.
-Later experiments were compared with our strong .91 baseline, not that starter.
-Compared with the preceding TASK-013 algorithm, all three overall metrics improve
-on Public, Shadow and two existing synthetic 800-session sets. Two small
-scenario MRR decreases were explicitly accepted: A/buying .692729 -> .690502;
-B/intent override .633509 -> .629838. This is NOT all-scenario non-regression.
-The final extraction reproduced the selected candidate exactly on those same
-sets; repeated reproduction is not new independent validation.
-See [method and limitations](docs/release/METHOD.md). No hidden-set or global
-optimality claim is made. Optional dense/API/multi-route experiments remain off.
+TechnicalScore is an objective input to Technical Execution, not the final
+competition score. Public, a deterministic Shadow set, and two existing
+800-session synthetic confirmation sets matched the frozen RC3 metrics exactly.
+Repeated runs of those sets are reproduction evidence, not fresh holdouts.
 
-TASK-015 controlled Windows measurements: response p50 25.66 ms, p95 102.46 ms,
-p99 141.08 ms; p95 about 5.48 ms above TASK-013. These are machine-specific
-three-pair medians, not speed guarantees for your machine.
+The demonstrated Intent Override case `public_0183` first becomes score-eligible
+after replacement intent, then hits at turn 5, rank 8. The demo harness knows the
+public target only for display; the Agent never receives it.
 
-## Current rules and capability boundary
+## Models, APIs, cost and resources
 
-The [current official submission rules](https://github.com/TechJam2026/techjam-conversational-search/blob/main/docs/submission_rules.md),
-checked 2026-08-31, explicitly allow non-LLM methods. After the deadline, evaluate
-the released final package with the unmodified official evaluator and the commit
-frozen at the Devpost deadline. Retain results and environment details. Do not
-change the Agent, prompts, indexes or configuration after that freeze.
+- Dense encoder: `sentence-transformers/all-MiniLM-L6-v2`, pinned revision
+  `1110a243fdf4706b3f48f1d95db1a4f5529b4d41` (Apache-2.0).
+- Local reranker: `cross-encoder/ms-marco-MiniLM-L6-v2`, pinned revision
+  `233902d25c440f23af6f7d6e94d2946bac0bee0a` (Apache-2.0).
+- CPU dependencies: NumPy, ONNX Runtime and Hugging Face Tokenizers, pinned in
+  `requirements-semantic.txt`.
+- Optional APIs: Qwen and DeepSeek compatible chat endpoints. They are not
+  required for Public reproduction or final local operation.
+- Successful Qwen integration proof: model `qwen3.8-max`, 3,726 prompt and 54
+  completion tokens, conservative cost delta RMB 0.058274. This proves the
+  adapter works; it is not claimed as a metric improvement.
+- Public run: zero model tokens and zero network attempts because no scripted
+  Public turn required semantic execution.
+- Independent Win11/Python 3.12 validation with verified local assets measured
+  about 143 ms p95. Latency is machine-specific and is not an official limit.
 
-The checked-in original `docs/submission_rules.md` in the full repository is
-historical; its network-policy wording does not describe the current rules.
-Offline operation is our choice, not an organizer mandate.
+API keys must be supplied by environment variables (`DASHSCOPE_API_KEY` or
+`DEEPSEEK_API_KEY`) and must never be committed. The default local path needs
+neither variable.
 
-The broader [Track 4 statement](https://bytedance.larkoffice.com/wiki/GdYFwzWNLiREsSkuIjZcDznInWc)
-also describes richer dense/multi-route retrieval, LLM ranking and orchestration.
-Those are not all active in this default. See the [requirements audit](docs/release/REQUIREMENTS.md).
-We do not claim full four-pillar coverage, guaranteed eligibility, private-set
-accuracy, or a globally optimal Agent.
-
-## Team contributions
-
-- Fang Tianchen: initial end-to-end Agent, algorithm/architecture direction and
-  final integration with AI coding assistance.
-- Liu Chunyi: QA, cross-platform contract/CI work and independent reviews.
-- Cheng Xianyun: reproduction analysis, evidence organization and demo storyboard;
-  final video production remains a separate deliverable.
-- Wang Siwen: isolated retrieval experiments, benchmarks and evidence-integrity
-  fixes. Rejected candidates are not described as deployed improvements.
-
-AI coding assistance supported implementation, tests and documentation; the team
-remains responsible for correctness and explaining the work.
-
-## Developer checks and packaging
-
-These require the full Git checkout, not the compact released ZIP:
+## Verification
 
 ```text
 python -m unittest discover -s tests -p "test_*.py"
 python scripts/team_gate.py --full-eval
-python scripts/build_release.py --output artifacts/release/intentcompass-rc3.zip
+python demo/run_demo.py
 ```
 
-The builder requires a clean committed tree and a new output path. One optional
-ONNX smoke test can skip without model dependencies. Do not run old experiment
-summary scripts for release acceptance: they pin historical source hashes.
+The final candidate passed 209 repository tests; independent Win11 acceptance
+also exercised the real dense and local cross-encoder path. See
+[`docs/release/task306/HANDOFF.md`](docs/release/task306/HANDOFF.md) for the
+evidence boundaries and exact asset procedure.
 
-## Data and remaining submission materials
+## Limitations
 
-The official kit supplies 50,000 Clothing/Shoes/Jewelry products and 200 Public
-sessions derived from Amazon Reviews 2023. Only released Public labels are
-packaged. Catalog files stay external and checksum-verified.
-Preserve [data attribution](DATA_ATTRIBUTION.md) and respect upstream terms.
+- Demand-driven semantic branches are proven separately because the scripted
+  Public conversations did not require them.
+- Parent-level catalog metadata may omit variant attributes; missing data stays
+  unknown rather than being treated as a match.
+- Local model assets add one-time build time, memory and platform-dependent latency.
+- Public and synthetic results do not predict the private set or real business conversion.
+- No UI, real transaction service, foundational-model training, multimodal
+  processing or industrial external vector database is included.
 
-Devpost requires an English description, public repository with README and a
-**public three-minute YouTube demo**. Passing technical checks does not complete
-video production or submission. See [recording guidance](docs/release/VIDEO-HANDOFF.md).
-These tools never upload a video or submit a project.
+## Team contributions
 
-For independent Windows/macOS acceptance, use the [team test instructions](docs/release/TEAM-TEST.md).
-Send the new ZIP, its external SHA256 and returned evidence through the team lead.
-Independent teammate acceptance remains pending until their actual results arrive.
+- **Fang Tianchen:** team lead, algorithm and architecture direction, original
+  end-to-end Agent, optimization and final integration.
+- **Liu Chunyi:** QA, cross-platform CI/contracts, release reproduction and
+  independent code reviews.
+- **Cheng Xianyun:** failure analysis, evidence organization, Windows testing,
+  demo storyboard and final video production.
+- **Wang Siwen:** retrieval experiments, benchmark isolation, evidence-integrity
+  fixes and independent semantic acceptance testing.
+
+AI coding assistance supported implementation, tests and documentation; the
+team remains responsible for the design, verification and submitted claims.
+
+## Data and third-party notices
+
+The competition catalog derives from Amazon Reviews 2023. See
+[`DATA_ATTRIBUTION.md`](DATA_ATTRIBUTION.md) and
+[`docs/submission/THIRD_PARTY_NOTICES.md`](docs/submission/THIRD_PARTY_NOTICES.md).
+The catalog, model binaries, generated dense index, credentials and private
+evaluation data are not committed.
+
+For judges, use the copy-ready
+[`testing instructions`](docs/submission/TESTING_INSTRUCTIONS.md) and
+[`final report`](docs/submission/FINAL_REPORT.md).

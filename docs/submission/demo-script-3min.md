@@ -1,5 +1,8 @@
 # Three-minute demo script
 
+> **Superseded baseline script.** Metrics and architecture below predate
+> TASK-306. Do not use this file for the final video.
+
 ## 0:00-0:25 — Problem and claim
 
 “IntentCompass is a deterministic conversational product-search agent. It

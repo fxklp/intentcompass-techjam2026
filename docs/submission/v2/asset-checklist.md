@@ -1,5 +1,7 @@
 # V2 production asset checklist
 
+> **Superseded TASK-203 checklist.** Do not use it as the final production state.
+
 Status: reviewer-requested local checklist revision for PR #7. It inventories
 what exists and what must be produced after independent review. No media has
 been recorded or uploaded.
